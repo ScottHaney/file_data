@@ -1,5 +1,5 @@
-require 'simplecov'
-SimpleCov.start
+require 'coveralls'
+Coveralls.wear!
 
 # Conventionally, all specs live under a `spec` directory, which RSpec adds to
 # the `$LOAD_PATH`. The generated `.rspec` file contains `--require spec_helper`
