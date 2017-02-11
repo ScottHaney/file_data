@@ -22,6 +22,9 @@ hash = exif.read_tags("path_to_file", image_width, image_length)
 ```
 
 Return Values:
+
 Tag type TYPE_UNDEFINED: Array of bytes and boolean which is true if the bytes are little endian
+
 Tag type that is not recognized: nil
+
 Otherwise: The value as the most appropriate type
