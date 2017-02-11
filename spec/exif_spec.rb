@@ -116,7 +116,7 @@ RSpec.describe FileData::Exif do
         let(:app1_body_one_block) { [endian_marker, [0, 42], [0, 0, 0, 8], [0, 1], [0, 1], [0, 1], [0, 0, 0, 1], [0, 0, 0, 201], [0, 0, 0, 0]] }
         let(:app1_body_two_blocks) do
           [endian_marker, [0, 42], [0, 0, 0, 8], [0, 1], [0, 1], [0, 1], [0, 0, 0, 1], [0, 0, 0, 201], [0, 0, 0, 26],
-           [0, 1], [0, 2], [0, 1], [0, 0, 0, 1], [0, 0, 0, 202], [0, 0, 0, 0]]
+           [0, 1], [1, 0], [0, 1], [0, 0, 0, 1], [0, 0, 0, 202], [0, 0, 0, 0]]
         end
 
         describe '#process_ifd_block_chain' do
@@ -137,7 +137,7 @@ RSpec.describe FileData::Exif do
 
           describe 'given an ifd chain with two blocks' do
             let(:big_endian_test_bytes) { app1_body_two_blocks }
-            it_behaves_like 'an ifd chain with tag/value pairs', [[1, 201], [2, 202]]
+            it_behaves_like 'an ifd chain with tag/value pairs', [[1, 201], [256, 202]]
           end
         end
 
@@ -164,7 +164,7 @@ RSpec.describe FileData::Exif do
         end
 
         describe '#read_tags' do
-          let(:all_tags_expected_result) { { :'1' => 201, :'2' => 202 } }
+          let(:all_tags_expected_result) { { 1 => 201, Image_Structure_Width: 202 } }
 
           context 'given an already opened stream as input' do
             let(:app1) { [255, 225, 0, app1_body_two_blocks.flatten.size + 8] + "Exif\0\0".bytes + app1_body_two_blocks }
@@ -198,7 +198,7 @@ RSpec.describe FileData::Exif do
 
                 describe 'specific tag found' do
                   let(:big_endian_test_bytes) { jpeg_soi + app1 }
-                  it { expect(read_tags).to eq(:'1' => 201) }
+                  it { expect(read_tags).to eq(1 => 201) }
                 end
 
                 describe 'does not read entire file if more tags exist' do

@@ -56,7 +56,7 @@ module FileData
 
     def add_tag_to_hash(tag, value, hash)
       tag_name = ExifTags::EXIF[tag]
-      hash[tag_name.nil? ? tag.to_s.to_sym : tag_name] = value
+      hash[tag_name.nil? ? tag : tag_name] = value
     end
 
     def each_tag(stream)
