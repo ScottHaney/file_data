@@ -219,11 +219,7 @@ RSpec.describe FileData::Exif do
               let(:pwd) { File.expand_path(File.dirname(__FILE__)) }
               let(:file_path) { File.join(pwd, 'test_files/test.jpg') }
 
-              it do
-                File.open(file_path, 'rb') do |f|
-                  expect(exif.read_tags(f)).to eq(all_tags_expected_result)
-                end
-              end
+              it { expect(exif.read_tags(file_path)).to eq(all_tags_expected_result) }
             end
           end
         end
