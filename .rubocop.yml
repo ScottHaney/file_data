@@ -1,0 +1,17 @@
+Metrics/LineLength:
+  Max: 150
+Metrics/MethodLength:
+  Max: 20
+Metrics/ClassLength:
+  Enabled: false
+EndOfLine:
+  Enabled: false
+Style/BlockLength:
+  Exclude:
+    - 'spec/**/*_spec.rb'
+Style/BlockComments:
+  Exclude:
+    - 'spec/spec_helper.rb'
+AllCops:
+  Exclude:
+    - 'file_data.gemspec'
