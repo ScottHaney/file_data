@@ -1,4 +1,4 @@
-# file_data [![Build Status](https://travis-ci.org/ScottHaney/file_data.svg?branch=master)]
+# file_data ![Build Status](https://travis-ci.org/ScottHaney/file_data.svg?branch=master)
 
 Ruby library that reads Exif tag data from Jpeg files. More file data formats may be supported in the future.
 
