@@ -5,19 +5,18 @@ Ruby library that reads Exif tag data from Jpeg files. More file data formats ma
 Examples for getting Exif tags:
 
 ```ruby
+exif = FileData::Exif.new
+
 #All Exif tags from a file
-exif = Exif.new
 hash = exif.read_tags("path_to_file")
 
 #All Exif tags from a binary stream
 io = StringIO.open("...")
-exif = Exif.new
 hash = exif.read_tags(io)
 
 #Only specific tag id numbers (see exif_tags.rb or the Exif spec)
 image_width = 256
 image_length = 257
-exif = Exif.new
 hash = exif.read_tags("path_to_file", image_width, image_length)
 ```
 
