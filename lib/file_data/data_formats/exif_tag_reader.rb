@@ -22,7 +22,7 @@ module FileData
       # Yield the tags or just skip ahead
 
       if @ifds_to_include.include?(ifd.index)
-        ifd.all_tags.each { |t| e.yield t }
+        ifd.tags.each { |t| e.yield t }
       else
         # Avoid skipping the last ifd as this is needless work
         ifd.skip unless ifd.index == 1

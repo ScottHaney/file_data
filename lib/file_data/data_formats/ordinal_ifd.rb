@@ -11,9 +11,9 @@ module FileData
       @index = index
     end
 
-    def all_tags
+    def tags
       Enumerator.new do |e|
-        tags.each do |tag_id|
+        super.each do |tag_id|
           if ExifTags.tag_groups.key?(tag_id)
             yield_extra_ifd_tags(e, tag_id)
           else
