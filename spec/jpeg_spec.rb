@@ -1,35 +1,36 @@
 require 'support/test_stream'
 require 'file_data/file_types/jpeg'
 
-RSpec.describe FileData::Exif do
-  let(:jpeg) { FileData::Jpeg }
+RSpec.describe FileData::Jpeg do
+  let(:jpeg) { FileData::Jpeg.new(stream) }
   let(:stream) { TestStream.get_stream(test_bytes) }
 
-  describe '.read_header' do
-    let(:read_header) { jpeg.read_header(stream) }
+  describe '#each_section' do
+    let(:each_section) { jpeg.each_section }
 
-    context 'when given a file with a jpeg header' do
-      let(:test_bytes) { [255, 216] }
-      it { expect { read_header }.not_to raise_error }
-    end
-
-    context 'when given a file with a header that is NOT a valid jpeg header' do
+    context 'when the jpeg SOI bytes are missing' do
       let(:test_bytes) { [255, 215] }
-      it { expect { read_header }.to raise_error(RuntimeError) }
+      it 'throws an exception' do
+        expect { each_section.to_a }.to raise_error(RuntimeError)
+      end
     end
-  end
 
-  describe '.read_section_header' do
-    describe 'with a size of 258 bytes' do
-      let(:test_bytes) { [[255, 224], [1, 2]].flatten }
-      it { expect(jpeg.read_section_header(stream)).to eq([[255, 224], 258]) }
-    end
-  end
+    context 'when there are two jpeg sections' do
+      let(:no_eoi_bytes) { [255, 216, 255, 1, 0, 2, 255, 2, 0, 2] }
 
-  describe '.each_section' do
-    describe 'with two sections of 4 and 6 bytes in size respectively' do
-      let(:test_bytes) { [[255, 216], [255, 224], [0, 4], [0, 0], [255, 225], [0, 6], [0, 0, 0, 0], [255, 217]].flatten }
-      it { expect(jpeg.each_section(stream).to_a).to eq([[[255, 224], 4], [[255, 225], 6]]) }
+      context 'and there are no jpeg EOI bytes' do
+        let(:test_bytes) { no_eoi_bytes }
+        it 'returns both jpeg sections' do
+          expect(each_section.to_a).to eq([ [[255, 1], 2], [[255, 2], 2] ])
+        end
+      end
+
+      context 'and the jpeg EOI bytes exist' do
+        let(:test_bytes) { no_eoi_bytes + [255, 217] }
+        it 'returns both jpeg sections' do
+          expect(each_section.to_a).to eq([ [[255, 1], 2], [[255, 2], 2] ])
+        end
+      end
     end
   end
 end

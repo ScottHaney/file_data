@@ -1,276 +1,188 @@
+require 'fakefs/spec_helpers'
 require 'support/test_stream'
 require 'file_data/data_formats/exif'
+require 'file_data/data_formats/exif_stream'
 
 RSpec.describe FileData::Exif do
-  let(:exif) { FileData::Exif.new }
+  let(:exif) { FileData::Exif.new(FileData::ExifStream.new(stream)) }
+  let(:exif_from_stream) { FileData::Exif.from_stream(stream) }
   let(:stream) { TestStream.get_stream(test_bytes) }
 
-  # Each test in this block must be repeated for both little and big endian byte orders
-  [['little endian', true], ['big endian', false]].each do |endian_name, is_little_endian|
-    describe "using a #{endian_name} stream" do
-      # Converts big_endian_test_bytes for an example into the proper endianess.
-      # Entries that are Arrays are affected by endianess and entries that are numbers are not.
-      let(:test_bytes) do
-        endian_bytes =
-          if is_little_endian
-            big_endian_test_bytes.map { |v| v.is_a?(Array) ? v.reverse : v }
-          else
-            big_endian_test_bytes
-          end
-        endian_bytes.flatten
+  let(:both_ifds_test) do
+    [77, 77, [0, 42], #Exif header
+    [0, 0, 0, 8], [0, 1], # IFD0 offset and tag count
+    [1, 0], [0, 3], [0, 0, 0, 2], [0, 0, 0, 1], # IFD0 Tag
+    [0, 0, 0, 26], [0, 1], # IFD1 offset and tag count
+    [1, 1], [0, 3], [0, 0, 0, 2], [0, 0, 0, 2], # IFD1 Tag
+    [0, 0, 0, 0]].flatten # No next IFD marker
+  end
+
+  context 'when the exif stream is empty' do
+    let(:test_bytes) { [] }
+
+    describe '#image_data_only' do
+      it 'delegates to exif_tags_internal(0)' do
+        data = FileData::ExifData.new
+        expect(data).to receive(:image)
+        expect(exif).to receive(:exif_tags_internal).with(0) { data }
+        exif.image_data_only
       end
+    end
 
-      describe '#read_value' do
-        let(:big_endian_test_bytes) { [[128, 0, 0, 0]] }
-        it { expect(exif.read_value(stream, 4, is_little_endian)).to eq(2**31) }
+    describe '#thumbnail_data_only' do
+      it 'delegates to exif_tags_internal(1)' do
+        data = FileData::ExifData.new
+        expect(data).to receive(:thumbnail)
+        expect(exif).to receive(:exif_tags_internal).with(1) { data }
+        exif.thumbnail_data_only
       end
+    end
 
-      context '#read_rational' do
-        let(:read_rational) { exif.read_rational(stream, is_srational, is_little_endian) }
-        let(:big_endian_test_bytes) { [[128, 0, 0, 1], [128, 0, 0, 0]] }
-
-        describe 'given a srational (signed rational)' do
-          let(:is_srational) { true }
-          it { expect(read_rational).to eq("#{-2**31 + 1}/#{-2**31}") }
-        end
-
-        describe 'given a rational (unsigned rational)' do
-          let(:is_srational) { false }
-          it { expect(read_rational).to eq("#{2**31 + 1}/#{2**31}") }
-        end
+    describe '#all_data' do
+      it 'delegates to exif_tags_internal(0, 1)' do
+        expect(exif).to receive(:exif_tags_internal).with(0, 1)
+        exif.all_data
       end
+    end
 
-      context '#read_tag_value' do
-        shared_examples_for 'a tag record that has a value of' do |value|
-          it { expect(exif.read_tag_value(stream, 0, is_little_endian)).to eq(value) }
-        end
-
-        describe 'that is a TYPE_BYTE record' do
-          let(:big_endian_test_bytes) { [[0, 1], [0, 0, 0, 1], [0, 0, 0, 128]] }
-          it_behaves_like 'a tag record that has a value of', 2**7
-        end
-
-        describe 'that is a TYPE_SHORT record' do
-          let(:big_endian_test_bytes) { [[0, 3], [0, 0, 0, 2], [0, 0, 1, 0]] }
-          it_behaves_like 'a tag record that has a value of', 2**8
-        end
-
-        describe 'that is a TYPE_LONG record' do
-          let(:big_endian_test_bytes) { [[0, 4], [0, 0, 0, 4], [128, 0, 0, 0]] }
-          it_behaves_like 'a tag record that has a value of', 2**31
-        end
-
-        describe 'that is a TYPE_SLONG record' do
-          let(:big_endian_test_bytes) { [[0, 9], [0, 0, 0, 4], [128, 0, 0, 0]] }
-          it_behaves_like 'a tag record that has a value of', -2**31
-        end
-
-        describe 'that is a TYPE_RATIONAL record plus the value' do
-          let(:big_endian_test_bytes) { [[0, 5], [0, 0, 0, 8], [0, 0, 0, 10], [128, 0, 0, 1], [128, 0, 0, 0]] }
-          it_behaves_like 'a tag record that has a value of', "#{2**31 + 1}/#{2**31}"
-        end
-
-        describe 'that is a TYPE_SRATIONAL record plus the value' do
-          let(:big_endian_test_bytes) { [[0, 10], [0, 0, 0, 8], [0, 0, 0, 10], [128, 0, 0, 1], [128, 0, 0, 0]] }
-          it_behaves_like 'a tag record that has a value of', "#{-2**31 + 1}/#{-2**31}"
-        end
-
-        describe 'that is a record with an unrecognized type' do
-          let(:big_endian_test_bytes) { [[0, 74], [0, 0, 0, 4], [0, 0, 0, 1]] }
-          it_behaves_like 'a tag record that has a value of', nil
-        end
-
-        describe 'with a value more than 4 bytes long' do
-          # raw_value is an array of bytes so that it isn't affected by endianess
-          let(:raw_value) { [72, 101, 108, 108, 111, 0] }
-
-          describe 'that is a TYPE_ASCII record plus the value' do
-            let(:big_endian_test_bytes) { [[0, 2], [0, 0, 0, 6], [0, 0, 0, 10]] + raw_value }
-            it_behaves_like 'a tag record that has a value of', 'Hello'
-          end
-
-          describe 'that is a TYPE_UNDEFINED record plus the value' do
-            let(:big_endian_test_bytes) { [[0, 7], [0, 0, 0, 6], [0, 0, 0, 10]] + raw_value }
-            it_behaves_like 'a tag record that has a value of', [[72, 101, 108, 108, 111, 0], is_little_endian]
-          end
-        end
-
-        describe 'with a value that is 4 bytes or less long' do
-          # raw_value is an array of bytes so that it isn't affected by endianess
-          let(:raw_value) { [67, 97, 114, 0] }
-
-          describe 'that is a TYPE_ASCII record' do
-            let(:big_endian_test_bytes) { [[0, 2], [0, 0, 0, 4]] + raw_value }
-            it_behaves_like 'a tag record that has a value of', 'Car'
-          end
-
-          describe 'that is a TYPE_UNDEFINED record' do
-            let(:big_endian_test_bytes) { [[0, 7], [0, 0, 0, 4]] + raw_value }
-            it_behaves_like 'a tag record that has a value of', [[67, 97, 114, 0], is_little_endian]
-          end
-        end
+    describe '#only_image_tag' do
+      it 'delegates to exif_tag_internal(0, tag_id)' do
+        expect(exif).to receive(:exif_tag_internal).with(0, [:xyz, 500])
+        exif.only_image_tag([:xyz, 500])
       end
+    end
 
-      context do
-        let(:endian_marker) { [(is_little_endian ? 'II' : 'MM').bytes] }
-        let(:app1_body_one_block) { [endian_marker, [0, 42], [0, 0, 0, 8], [0, 1], [0, 1], [0, 1], [0, 0, 0, 1], [0, 0, 0, 201], [0, 0, 0, 0]] }
-        let(:app1_body_two_blocks) do
-          [endian_marker, [0, 42], [0, 0, 0, 8], [0, 1], [0, 1], [0, 1], [0, 0, 0, 1], [0, 0, 0, 201], [0, 0, 0, 26],
-           [0, 1], [1, 0], [0, 1], [0, 0, 0, 1], [0, 0, 0, 202], [0, 0, 0, 0]]
-        end
-
-        describe '#process_ifd_block_chain' do
-          shared_examples_for 'an ifd chain with tag/value pairs' do |tags|
-            it do
-              enum = Enumerator.new do |e|
-                exif.process_ifd_block_chain(stream, e, 0, 8, is_little_endian)
-              end
-
-              expect(enum.to_a).to eq(tags)
-            end
-          end
-
-          describe 'given an ifd chain with a single block' do
-            let(:big_endian_test_bytes) { app1_body_one_block }
-            it_behaves_like 'an ifd chain with tag/value pairs', [[1, 201]]
-          end
-
-          describe 'given an ifd chain with two blocks' do
-            let(:big_endian_test_bytes) { app1_body_two_blocks }
-            it_behaves_like 'an ifd chain with tag/value pairs', [[1, 201], [256, 202]]
-          end
-        end
-
-        describe '#process_exif_section' do
-          describe 'a section with one block ifd chain' do
-            shared_examples_for 'an exif section with tag/values' do |tags|
-              it { expect(exif.process_exif_section(stream).to_a).to eq(tags) }
-            end
-
-            describe 'and NO extra exif ifd chain' do
-              let(:big_endian_test_bytes) { app1_body_one_block }
-              it_behaves_like 'an exif section with tag/values', [[1, 201]]
-            end
-
-            describe 'and an extra exif ifd chain' do
-              let(:big_endian_test_bytes) do
-                [endian_marker, [0, 42], [0, 0, 0, 8], [0, 1], [135, 105], [0, 4], [0, 0, 0, 4], [0, 0, 0, 26],
-                 [0, 0, 0, 0], [0, 1], [0, 3], [0, 1], [0, 0, 0, 1], [0, 0, 0, 203], [0, 0, 0, 0]]
-              end
-
-              it_behaves_like 'an exif section with tag/values', [[3, 203]]
-            end
-          end
-        end
-
-        describe '#read_tags' do
-          let(:all_tags_expected_result) { { 1 => 201, Image_Structure_Width: 202 } }
-
-          context 'given an already opened stream as input' do
-            let(:app1) { [255, 225, 0, app1_body_two_blocks.flatten.size + 8] + "Exif\0\0".bytes + app1_body_two_blocks }
-            let(:app0) { [255, 224, 0, 2] }
-            let(:jpeg_soi) { [255, 216] }
-            let(:read_tags) { exif.read_tags(stream, *specific_tags) }
-
-            describe 'no specific tags given' do
-              let(:specific_tags) { [] }
-
-              describe 'exif section is not the first jpeg section' do
-                let(:big_endian_test_bytes) { jpeg_soi + app0 + app1 }
-                it { expect(read_tags).to eq(all_tags_expected_result) }
-              end
-
-              describe 'exif section is the first jpeg section' do
-                let(:big_endian_test_bytes) { jpeg_soi + app1 }
-                it { expect(read_tags).to eq(all_tags_expected_result) }
-              end
-            end
-
-            describe 'one or more specific tags given' do
-              describe 'specific tag not found' do
-                let(:specific_tags) { 5 }
-                let(:big_endian_test_bytes) { jpeg_soi + app1 }
-                it { expect(read_tags).to be_empty }
-              end
-
-              context 'first tag in exif data given as specific tag' do
-                let(:specific_tags) { 1 }
-
-                describe 'specific tag found' do
-                  let(:big_endian_test_bytes) { jpeg_soi + app1 }
-                  it { expect(read_tags).to eq(1 => 201) }
-                end
-
-                describe 'does not read entire file if more tags exist' do
-                  let(:big_endian_test_bytes) { jpeg_soi + app1 }
-
-                  it do
-                    read_tags
-                    expect(stream.pos).to be < stream.size
-                  end
-                end
-              end
-            end
-          end
-
-          # The test file is big endian so only test in that scenario
-          unless is_little_endian
-            context 'when given a file path as input' do
-              let(:pwd) { File.expand_path(File.dirname(__FILE__)) }
-              let(:file_path) { File.join(pwd, 'test_files/test.jpg') }
-
-              it { expect(exif.read_tags(file_path)).to eq(all_tags_expected_result) }
-            end
-          end
-        end
+    describe '#only_thumbnail_tag' do
+      it 'delegates to exif_tag_internal(input, 1, tag_id)' do
+        expect(exif).to receive(:exif_tag_internal).with(1, [:xyz, 500])
+        exif.only_thumbnail_tag([:xyz, 500])
       end
     end
   end
 
-  describe '#to_slong' do
-    it { expect(exif.to_slong(2**32 - 1)).to eq(-1) }
-  end
+  describe '#tags' do
+    let(:tags_from_stream) { exif_from_stream.tags(*ifds_to_include) }
+    let(:tags) { exif.tags(*ifds_to_include) }
 
-  describe '#read_header' do
-    let(:read_header) { exif.read_header(stream) }
+    context 'when there is no exif data' do
+      let(:test_bytes) { [255, 216, 255, 225, 0, 2, 255, 217] }
+      let(:ifds_to_include) { [0, 1] }
 
-    describe 'with an intel (little endian) marker' do
-      let(:test_bytes) { ['II'.bytes, [42, 0]].flatten }
-      it { expect(read_header).to be true }
+      it 'returns an empty collection' do
+        expect(tags_from_stream.to_a).to be_empty
+      end
     end
 
-    describe 'with a motorolla (big endian) marker' do
-      let(:test_bytes) { ['MM'.bytes, [0, 42]].flatten }
-      it { expect(read_header).to be false }
-    end
+    context 'given a stream with image and thumbnail data' do
+      let(:test_bytes) { both_ifds_test }
 
-    describe 'with an unrecognized endian type marker' do
-      let(:test_bytes) { ['AA'.bytes, [0, 42]].flatten }
-      it { expect { read_header }.to raise_error(RuntimeError) }
-    end
-  end
+      describe 'when only image data should be included' do
+        let(:ifds_to_include) { [0] }
 
-  describe '#exif_section?' do
-    describe 'given a jpeg section' do
-      let(:exif_section?) { exif.exif_section?(stream, section_marker) }
-
-      describe 'whose marker is NOT an exif marker' do
-        let(:section_marker) { [255, 226] }
-        let(:test_bytes) { [] }
-        it { expect(exif_section?).to be false }
+        it 'returns the image data' do
+          expect(tags.to_a).to eq([[0, :Tiff, 256]])
+        end
       end
 
-      describe 'whose marker is an exif marker' do
-        let(:section_marker) { [255, 225] }
+      describe 'when only thumbnail data should be included' do
+        let(:ifds_to_include) { [1] }
 
-        describe 'whose body starts with the exif header' do
-          let(:test_bytes) { "Exif\0\0".bytes }
-          it { expect(exif_section?).to be true }
+        it 'returns the thumbnail data' do
+          expect(tags.to_a).to eq([[1, :Tiff, 257]])
+        end
+      end
+
+      describe 'when all data should be included' do
+        let(:ifds_to_include) { [0, 1] }
+
+        it 'returns the thumbnail data' do
+          expect(tags.to_a).to eq([[0, :Tiff, 256], [1, :Tiff, 257]])
+        end
+      end
+    end
+
+    context 'given that there is only image data' do
+      context 'which has only one tag' do
+        context 'that is an exif ifd pointer tag' do
+          context 'which points to an extra exif ifd with one tag' do
+            let(:test_bytes) do
+              [77, 77, [0, 42], #Exif header
+              [0, 0, 0, 8], [0, 1], # IFD0 offset and tag count
+              [135, 105], [0, 4], [0, 0, 0, 4], [0, 0, 0, 26], # exif ifd pointer Tag
+              [0, 0, 0, 0], [0, 1], # No next IFD marker and exif ifd tag count
+              [1, 1], [0, 3], [0, 0, 0, 2], [0, 0, 0, 2], # exif Tag
+              [0, 0, 0, 0]].flatten # No next IFD marker
+            end
+            let(:ifds_to_include) { [0] }
+
+            it 'returns only the tag in the extra exif ifd' do
+              expect(tags.to_a).to eq([[0, 34_665, 257]])
+            end
+          end
+        end
+      end
+    end
+
+    describe '#exif_tag_internal' do
+      let(:exif_tag_internal) { exif.exif_tag_internal(ifd_index, tag_to_find) }
+      let(:test_bytes) { both_ifds_test }
+      let(:ifd_index) { 0 }
+
+      context 'when there are two tags' do
+        describe 'and searching for a tag that is found' do
+          let(:tag_to_find) { [:Tiff, 256] }
+
+          it "returns the tag's value" do
+            expect(exif_tag_internal).to eq(1)
+          end
         end
 
-        describe 'whose body does NOT start with the exif header' do
-          let(:test_bytes) { 'OtherHeader'.bytes }
-          it { expect(exif_section?).to be false }
+        describe 'and searching for a tag that is not found' do
+          let(:tag_to_find) { [:xyz, 4000] }
+
+          it 'returns nil' do
+            expect(exif_tag_internal).to be nil
+          end
+        end
+      end
+    end
+
+    describe '#exif_tags_internal' do
+      let(:exif_tags_internal) { exif.exif_tags_internal(*ifds_to_include) }
+
+      context 'when there is one image tag' do
+        context 'and there is one thumbnail tag' do
+          let(:test_bytes) { both_ifds_test }
+
+          describe 'and only image data should be returned' do
+            let(:ifds_to_include) { [0] }
+
+            it 'returns a hash containing the tag and value' do
+              data = exif_tags_internal
+              expect(data.image).to eq(Image_Structure_Width: 1)
+              expect(data.thumbnail).to be_empty
+            end
+          end
+
+          describe 'and only thumbnail data should be returned' do
+            let(:ifds_to_include) { [1] }
+
+            it 'returns a hash containing the tag and value' do
+              data = exif_tags_internal
+              expect(data.image).to be_empty
+              expect(data.thumbnail).to eq(Image_Structure_Length: 2)
+            end
+          end
+
+          describe 'and all data should be returned' do
+            let(:ifds_to_include) { [0, 1] }
+
+            it 'returns a hash containing the tag and value' do
+              data = exif_tags_internal
+              expect(data.image).to eq(Image_Structure_Width: 1)
+              expect(data.thumbnail).to eq(Image_Structure_Length: 2)
+            end
+          end
         end
       end
     end
