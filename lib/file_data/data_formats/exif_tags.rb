@@ -5,8 +5,7 @@ module FileData
     @tag_groups = {}
 
     def self.get_tag_name(ifd_id, tag_id)
-      known_name = get_known_name(ifd_id, tag_id)
-      known_name.nil? ? "#{ifd_id}-#{tag_id}".to_sym : known_name
+      get_known_name(ifd_id, tag_id) || "#{ifd_id}-#{tag_id}".to_sym
     end
 
     def self.get_known_name(ifd_id, tag_id)
