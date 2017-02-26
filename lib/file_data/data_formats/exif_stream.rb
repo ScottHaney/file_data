@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module FileData
   # Wraps a stream with exif specific logic
   class ExifStream
@@ -17,7 +19,8 @@ module FileData
 
     VALUE_OFFSET_SIZE = 4
 
-    attr_reader :stream
+    extend Forwardable
+    def_delegators :@stream, :seek, :pos
 
     def initialize(stream)
       @stream, @section_offset = stream, stream.pos

@@ -11,9 +11,9 @@ module FileData
     def tags
       Enumerator.new do |e|
         @num_tags.times do
-          tag_start_pos = @exif_stream.stream.pos
+          tag_start_pos = @exif_stream.pos
           e.yield @exif_stream.read_value(2)
-          @exif_stream.stream.seek(tag_start_pos + TAG_RECORD_SIZE)
+          @exif_stream.seek(tag_start_pos + TAG_RECORD_SIZE)
         end
       end.lazy
     end

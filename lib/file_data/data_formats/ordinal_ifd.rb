@@ -32,7 +32,7 @@ module FileData
     end
 
     def skip
-      @exif_stream.stream.seek(@num_tags * Ifd::TAG_RECORD_SIZE, IO::SEEK_CUR)
+      @exif_stream.seek(@num_tags * Ifd::TAG_RECORD_SIZE, IO::SEEK_CUR)
     end
   end
 end
