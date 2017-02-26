@@ -1,4 +1,5 @@
 module FileData
+  # Represents the tags present in any ifd (ordinal or extra)
   class Ifd
     TAG_RECORD_SIZE = 12
 

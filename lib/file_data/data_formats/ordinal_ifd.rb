@@ -2,6 +2,7 @@ require 'file_data/data_formats/ifd'
 require 'file_data/data_formats/exif_tags'
 
 module FileData
+  # Represents either the zeroth or first ifd
   class OrdinalIfd < Ifd
     attr_reader :index
 

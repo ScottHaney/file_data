@@ -1,9 +1,11 @@
 Metrics/LineLength:
-  Max: 150
+  Max: 80
+  Exclude:
+    - 'spec/**/*_spec.rb'
 Metrics/MethodLength:
-  Max: 20
+  Max: 15
 Metrics/ClassLength:
-  Enabled: false
+  Max: 100
 EndOfLine:
   Enabled: false
 Style/BlockLength:

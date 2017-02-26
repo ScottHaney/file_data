@@ -4,6 +4,7 @@ require 'file_data/data_formats/exif_tags'
 require 'set'
 require 'file_data/data_formats/exif_stream'
 require 'file_data/data_formats/exif_tag_reader'
+require 'file_data/data_formats/exif_data'
 
 module FileData
   # Returns the exif data from a jpeg file
@@ -13,7 +14,7 @@ module FileData
     end
 
     def self.from_stream(stream)
-      Exif.new(ExifJpeg.new(stream).get_exif)
+      Exif.new(ExifJpeg.new(stream).exif)
     end
 
     def image_data_only
@@ -37,8 +38,8 @@ module FileData
     end
 
     def exif_tags_internal(*ifds_to_include)
-      tags(*ifds_to_include).each_with_object(ExifData.new) do |tag_info, tags_data|
-        tags_data.add_tag(*tag_info, @exif_stream.read_tag_value)
+      tags(*ifds_to_include).each_with_object(ExifData.new) do |tag_info, data|
+        data.add_tag(*tag_info, @exif_stream.read_tag_value)
       end
     end
 
@@ -47,7 +48,7 @@ module FileData
     end
 
     def find_tag(ifd_index, tag_to_find)
-      tags(ifd_index).find do |index, ifd_id, tag_num|
+      tags(ifd_index).find do |_, ifd_id, tag_num|
         tag_to_find == [ifd_id, tag_num]
       end
     end
@@ -57,22 +58,6 @@ module FileData
 
       @exif_stream.read_header
       ExifTagReader.new(@exif_stream, *ifds_to_include).tags
-    end
-  end
-
-  class ExifData
-    NAMES = { 0 => :image, 1 => :thumbnail }.freeze
-
-    def initialize
-      @hash = { 0 => {}, 1 => {} }
-      @hash.keys.each do |k|
-        self.class.send(:define_method, NAMES[k]) { @hash[k] }
-      end
-    end
-
-    def add_tag(index, ifd_id, tag_id, tag_value)
-      name = ExifTags.get_tag_name(ifd_id, tag_id)
-      @hash[index][name] = tag_value
     end
   end
 end

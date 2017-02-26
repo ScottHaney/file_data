@@ -1,8 +1,10 @@
 module FileData
-  # Represents a Jpeg image
+  # Represents a Jpeg image stream
   class Jpeg
     SOI_BYTES = [255, 216].freeze
     SECTION_HEADER_SIZE = 4
+    INVALID_HEADER_MSG = 'the given file is not a jpeg file since it does not'\
+     'begin with the start of image (SOI) bytes.'.freeze
 
     def initialize(stream)
       @stream = stream
@@ -14,15 +16,14 @@ module FileData
     end
 
     def read_header
-      # Read the jpeg SOI bytes
       soi = read_bytes(SOI_BYTES.size)
-      raise 'the given file is not a jpeg file since it does not begin with the start of image (SOI) bytes' unless soi == SOI_BYTES
+      raise INVALID_HEADER_MSG unless soi == SOI_BYTES
     end
 
     def yield_sections(e)
       loop do
         next_section_pos = yield_section(e)
-        break unless is_section_pos(next_section_pos)
+        break unless section_pos?(next_section_pos)
         @stream.seek(next_section_pos)
       end
     end
@@ -34,7 +35,7 @@ module FileData
       section_start_pos + size
     end
 
-    def is_section_pos(section_pos)
+    def section_pos?(section_pos)
       # Make sure that there are enough bytes for a section header.
       # This also handles an ending two byte JPEG EOI sequence.
       @stream.size - section_pos >= SECTION_HEADER_SIZE

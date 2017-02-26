@@ -2,8 +2,8 @@ require 'file_data/data_formats/exif_stream'
 require 'file_data/data_formats/ordinal_ifd'
 
 module FileData
+  # Enumerates the tags in an ExifStream
   class ExifTagReader
-
     def initialize(exif_stream, *ifds_to_include)
       @exif_stream = exif_stream
       @ifds_to_include = ifds_to_include
@@ -32,7 +32,7 @@ module FileData
     def next_ifd(index)
       # An ifd offset of zero indicates that there is no next ifd
       ifd_offset = @exif_stream.read_value(4)
-      OrdinalIfd.new(@exif_stream, ifd_offset, index) unless ifd_offset == 0
+      OrdinalIfd.new(@exif_stream, ifd_offset, index) unless ifd_offset.zero?
     end
   end
 end

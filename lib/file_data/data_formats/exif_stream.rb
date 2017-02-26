@@ -23,14 +23,16 @@ module FileData
     def_delegators :@stream, :seek, :pos
 
     def initialize(stream)
-      @stream, @section_offset = stream, stream.pos
+      @stream = stream
+      @section_offset = stream.pos
     end
 
     def read_header
-      @is_big_endian = case @stream.each_byte.take(2)
-          when INTEL_BYTES then false
-          when MOTOROLLA_BYTES then true
-          else raise 'the byte order bytes did not match any expected value'
+      @is_big_endian =
+        case @stream.each_byte.take(2)
+        when INTEL_BYTES then false
+        when MOTOROLLA_BYTES then true
+        else raise 'the byte order bytes did not match any expected value'
         end
 
       raise 'the tiff constant 42 is missing' unless read_value(2) == 42
@@ -45,14 +47,14 @@ module FileData
       size = read_value(4)
 
       case type
-        when TYPE_RATIONAL, TYPE_SRATIONAL
-          read_large_val(type)
-        when TYPE_BYTE, TYPE_SHORT, TYPE_LONG, TYPE_SLONG
-          read_small_val(type)
-        when TYPE_ASCII
-          read_text(size)
-        when TYPE_UNDEFINED
-          read_undefined(size)
+      when TYPE_RATIONAL, TYPE_SRATIONAL
+        read_large_val(type)
+      when TYPE_BYTE, TYPE_SHORT, TYPE_LONG, TYPE_SLONG
+        read_small_val(type)
+      when TYPE_ASCII
+        read_text(size)
+      when TYPE_UNDEFINED
+        read_undefined(size)
       end
     end
 
@@ -96,7 +98,9 @@ module FileData
 
     def read_value(num_bytes)
       bytes = @stream.each_byte.take(num_bytes)
-      (@is_big_endian ? bytes : bytes.reverse).inject { |total, val| (total << 8) + val }
+      bytes.reverse! unless @is_big_endian
+
+      bytes.inject { |total, val| (total << 8) + val }
     end
   end
 end

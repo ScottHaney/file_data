@@ -16,7 +16,7 @@ RSpec.describe FileData::ExifTags do
     end
 
     describe 'when the ifd id does not have a known name' do
-    let(:ifd_id) { 555 }
+      let(:ifd_id) { 555 }
       let(:tag_id) { 12 }
 
       it 'returns the ifd id and tag id joined together by a hyphen' do
