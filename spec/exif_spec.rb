@@ -17,6 +17,15 @@ RSpec.describe FileData::Exif do
     [0, 0, 0, 0]].flatten # No next IFD marker
   end
 
+  describe ".from_stream" do
+    context 'given a jpeg stream without an exif section'
+      let(:test_bytes) { [255, 216, 255, 225, 0, 2, 255, 217] }
+
+      it 'can process the jpeg stream' do
+        expect { exif_from_stream }.to_not raise_error
+      end
+  end
+
   context 'when the exif stream is empty' do
     let(:test_bytes) { [] }
 
