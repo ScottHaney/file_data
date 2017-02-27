@@ -1,1 +1,1 @@
-require 'file_data/data_formats/exif'
+require 'file_data/formats/exif/exif'
