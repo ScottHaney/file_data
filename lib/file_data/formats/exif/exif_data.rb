@@ -4,9 +4,9 @@ module FileData
     NAMES = { 0 => :image, 1 => :thumbnail }.freeze
 
     def initialize
-      @hash = { 0 => {}, 1 => {} }
-      @hash.keys.each do |k|
-        self.class.send(:define_method, NAMES[k]) { @hash[k] }
+      @hash = NAMES.each_with_object({}) do |pair, hash|
+        hash[pair[0]] = {}
+        self.class.send(:define_method, pair[1]) { @hash[pair[0]] }
       end
     end
 
