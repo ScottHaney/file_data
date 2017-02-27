@@ -1,10 +1,7 @@
-require 'file_data/data_formats/exif_jpeg'
-require 'file_data/core_extensions/enumerable_extensions'
-require 'file_data/data_formats/exif_tags'
+require_relative 'exif_jpeg'
 require 'set'
-require 'file_data/data_formats/exif_stream'
-require 'file_data/data_formats/exif_tag_reader'
-require 'file_data/data_formats/exif_data'
+require_relative 'exif_tag_reader'
+require_relative 'exif_data'
 
 module FileData
   # Returns the exif data from a jpeg file

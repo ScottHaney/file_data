@@ -1,5 +1,5 @@
-require 'file_data/data_formats/exif_stream'
-require 'file_data/data_formats/ordinal_ifd'
+require_relative 'exif_stream'
+require_relative 'ordinal_ifd'
 
 module FileData
   # Enumerates the tags in an ExifStream

@@ -1,7 +1,7 @@
 require 'fakefs/spec_helpers'
 require 'support/test_stream'
-require 'file_data/data_formats/exif'
-require 'file_data/data_formats/exif_stream'
+require 'file_data/formats/exif/exif'
+require 'file_data/formats/exif/exif_stream'
 
 RSpec.describe FileData::Exif do
   let(:exif) { FileData::Exif.new(FileData::ExifStream.new(stream)) }

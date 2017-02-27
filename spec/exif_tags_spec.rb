@@ -1,4 +1,4 @@
-require 'file_data/data_formats/exif_tags'
+require 'file_data/formats/exif/exif_tags'
 
 RSpec.describe FileData::ExifTags do
   let(:exif_tags) { FileData::ExifTags }

@@ -1,4 +1,4 @@
-require 'file_data/data_formats/exif_stream'
+require 'file_data/formats/exif/exif_stream'
 require 'support/test_stream'
 
 RSpec.describe FileData::ExifStream do

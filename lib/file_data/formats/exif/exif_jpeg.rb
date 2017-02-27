@@ -1,5 +1,5 @@
 require 'file_data/file_types/jpeg'
-require 'file_data/data_formats/exif_stream'
+require_relative 'exif_stream'
 
 module FileData
   # Retrieves an ExifStream from a jpeg stream
