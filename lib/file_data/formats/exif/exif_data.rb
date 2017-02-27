@@ -1,5 +1,5 @@
 module FileData
-  # Contains structured representation of exif tags and values
+  # Container for Exif tag values
   class ExifData
     NAMES = { 0 => :image, 1 => :thumbnail }.freeze
 
