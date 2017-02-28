@@ -10,25 +10,38 @@ Ruby library that reads Exif tag data from Jpeg files. More file data formats ma
 Examples for getting Exif tags:
 
 ```ruby
-exif = FileData::Exif.new
+# Get Exif data from a file path
+File.open('...', 'rb') do |f|
+  exif = FileData::Exif.from_stream(f)
+  # Insert command here, should only use a single command...
+end
 
-#All Exif tags from a file
-hash = exif.read_tags("path_to_file")
+# Command examples
 
-#All Exif tags from a binary stream
-io = StringIO.open("...")
-hash = exif.read_tags(io)
+# Get only the image Exif data
+hash = exif.image_data_only
 
-#Only specific tag id numbers (see exif_tags.rb or the Exif spec)
-image_width = 256
-image_length = 257
-hash = exif.read_tags("path_to_file", image_width, image_length)
-```
+# Get only the thumbnail Exif data
+hash = exif.thumbnail_data_only
 
-Return Values:
+# Get all data (image and thumbnail)
+# Use result.image or result.thumbnail to get value hashes
+result = exif.all_data
 
-Tag type TYPE_UNDEFINED: Array of bytes and boolean which is true if the bytes are little endian
+# Get only a single tag
+# tag_id is the key from FileData::ExifTags.tag_groups and then the tag key in the value hash
+# for example [34_665, 36_867] is tag :Exif_DateAndTime_DateTimeOriginal
 
-Tag type that is not recognized: nil
+# Image example
+tag_value = exif.only_image_tag(tag_id)
 
-Otherwise: The value as the most appropriate type
+# Thumbnail example
+tag_value = exif.only_thumbnail_tag(tag_id)
+
+# Complete example
+File.open('...', 'rb') do |f|
+  exif = FileData::Exif.from_stream(f)
+  hash = exif.image_data_only
+end
+
+
