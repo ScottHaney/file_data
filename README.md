@@ -56,7 +56,7 @@ File.open('...', 'rb') do |f|
 end
 ```
 
-# Known Tag Keys
+## Known Tag Keys
 
 Below is the contents of FileData::ExifTags.tag_groups which lists all known tag keys and their uniquely assigned names
 
