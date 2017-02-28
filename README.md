@@ -54,6 +54,7 @@ File.open('...', 'rb') do |f|
   exif = FileData::Exif.from_stream(f)
   hash = exif.image_data_only
 end
+```
 
 # Known Tag Keys
 
