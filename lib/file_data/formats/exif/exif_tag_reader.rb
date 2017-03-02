@@ -4,8 +4,12 @@ require_relative 'ordinal_ifd'
 module FileData
   # Enumerates the tags in an ExifStream
   class ExifTagReader
+    NO_NEXT_IFD = 0
+
+    attr_accessor :stream, :ifds_to_include
+
     def initialize(exif_stream, *ifds_to_include)
-      @exif_stream = exif_stream
+      @stream = exif_stream
       @ifds_to_include = ifds_to_include
     end
 
@@ -21,7 +25,7 @@ module FileData
     def process_ifd(ifd, e)
       # Yield the tags or just skip ahead
 
-      if @ifds_to_include.include?(ifd.index)
+      if ifds_to_include.include?(ifd.index)
         ifd.tags.each { |t| e.yield t }
       else
         # Avoid skipping the last ifd as this is needless work
@@ -30,9 +34,11 @@ module FileData
     end
 
     def next_ifd(index)
-      # An ifd offset of zero indicates that there is no next ifd
-      ifd_offset = @exif_stream.read_value(4)
-      OrdinalIfd.new(@exif_stream, ifd_offset, index) unless ifd_offset.zero?
+      ifd_offset = stream.read_value(4)
+      unless ifd_offset == NO_NEXT_IFD
+        stream.seek_exif(ifd_offset)
+        OrdinalIfd.new(stream, index)
+      end
     end
   end
 end

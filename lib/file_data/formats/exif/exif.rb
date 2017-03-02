@@ -1,60 +1,27 @@
+require_relative 'exif_reader'
 require_relative 'exif_jpeg'
-require 'set'
-require_relative 'exif_tag_reader'
-require_relative 'exif_data'
 
 module FileData
-  # Returns the exif data from a jpeg file
+  # Convenience class for extracting exif data from a file or stream
   class Exif
-    def initialize(exif_stream)
-      @exif_stream = exif_stream
+    def method_missing(name, *args)
+      return super if args.length.zero?
+      process(args[0], name, args.drop(1))
     end
 
-    def self.from_stream(stream)
-      Exif.new(ExifJpeg.new(stream).exif)
-    end
-
-    def image_data_only
-      exif_tags_internal(0).image
-    end
-
-    def thumbnail_data_only
-      exif_tags_internal(1).thumbnail
-    end
-
-    def all_data
-      exif_tags_internal(0, 1)
-    end
-
-    def only_image_tag(tag_id)
-      exif_tag_internal(0, tag_id)
-    end
-
-    def only_thumbnail_tag(tag_id)
-      exif_tag_internal(1, tag_id)
-    end
-
-    def exif_tags_internal(*ifds_to_include)
-      tags(*ifds_to_include).each_with_object(ExifData.new) do |tag_info, data|
-        data.add_tag(*tag_info, @exif_stream.read_tag_value)
+    def process(input, name, other_args)
+      streamify(input) do |stream|
+        exif = ExifJpeg.new(stream).exif
+        ExifReader.new.send(name, exif, *other_args)
       end
     end
 
-    def exif_tag_internal(ifd_index, tag_to_find)
-      @exif_stream.read_tag_value if find_tag(ifd_index, tag_to_find)
-    end
-
-    def find_tag(ifd_index, tag_to_find)
-      tags(ifd_index).find do |_, ifd_id, tag_num|
-        tag_to_find == [ifd_id, tag_num]
+    def streamify(input)
+      if input.is_a?(String)
+        File.open(input, 'rb') { |f| yield f }
+      else
+        yield input
       end
-    end
-
-    def tags(*ifds_to_include)
-      return [] if @exif_stream.nil?
-
-      @exif_stream.read_header
-      ExifTagReader.new(@exif_stream, *ifds_to_include).tags
     end
   end
 end
