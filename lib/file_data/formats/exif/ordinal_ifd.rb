@@ -46,6 +46,6 @@ module FileData
 
     def skip
       stream.seek(tags_size(read_num_tags), IO::SEEK_CUR)
-    end    
+    end
   end
 end

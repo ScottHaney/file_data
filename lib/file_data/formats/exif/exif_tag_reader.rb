@@ -35,10 +35,12 @@ module FileData
 
     def next_ifd(index)
       ifd_offset = stream.read_value(4)
-      unless ifd_offset == NO_NEXT_IFD
-        stream.seek_exif(ifd_offset)
-        OrdinalIfd.new(stream, index)
-      end
+      ifd_from_offset(ifd_offset, index) unless ifd_offset == NO_NEXT_IFD
+    end
+
+    def ifd_from_offset(ifd_offset, index)
+      stream.seek_exif(ifd_offset)
+      OrdinalIfd.new(stream, index)
     end
   end
 end

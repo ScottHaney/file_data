@@ -30,7 +30,7 @@ RSpec.describe FileData::Exif do
     context 'when given an input file' do
       let(:test_file) { '/test.jpg' }
       before do
-        File.open(test_file, 'w') { |f| f.write both_ifds_test.pack("C*") }
+        File.open(test_file, 'w') { |f| f.write both_ifds_test.pack('C*') }
       end
 
       it 'reads the image data' do
@@ -49,7 +49,7 @@ RSpec.describe FileData::Exif do
     context 'when given an input file' do
       let(:test_file) { '/test.jpg' }
       before do
-        File.open(test_file, 'w') { |f| f.write both_ifds_test.pack("C*") }
+        File.open(test_file, 'w') { |f| f.write both_ifds_test.pack('C*') }
       end
 
       it 'reads the thumbnail data' do

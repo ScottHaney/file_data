@@ -1,5 +1,5 @@
 Metrics/LineLength:
-  Max: 80
+  Max: 100
   Exclude:
     - 'spec/**/*_spec.rb'
 Metrics/MethodLength:

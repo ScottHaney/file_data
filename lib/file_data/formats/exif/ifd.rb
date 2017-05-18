@@ -1,4 +1,5 @@
 module FileData
+  # Contains the ability to enumerate through the exif tags in an ifd
   module TagEnumerator
     TAG_RECORD_SIZE = 12
 
@@ -14,13 +15,12 @@ module FileData
 
     def read_num_tags
       stream.read_value(2)
-    end   
+    end
 
     def tags_size(num_tags)
       num_tags * TAG_RECORD_SIZE
     end
   end
-
 
   # Represents the tags present in any ifd (ordinal or extra)
   class Ifd
