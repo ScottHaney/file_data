@@ -26,6 +26,15 @@ module FileData
       exif_tag_internal(exif_stream, 1, tag_id)
     end
 
+    def tags(exif_stream, *ifds_to_include)
+      return [] if exif_stream.nil?
+
+      exif_stream.read_header
+      ExifTagReader.new(exif_stream, *ifds_to_include).tags
+    end
+
+    private
+
     def exif_tags_internal(exif_stream, *ifds_to_include)
       tags(exif_stream, *ifds_to_include).each_with_object(ExifData.new) do |tag_info, data|
         data.add_tag(*tag_info, exif_stream.read_tag_value)
@@ -40,13 +49,6 @@ module FileData
       tags(exif_stream, ifd_index).find do |_, ifd_id, tag_num|
         tag_to_find == [ifd_id, tag_num]
       end
-    end
-
-    def tags(exif_stream, *ifds_to_include)
-      return [] if exif_stream.nil?
-
-      exif_stream.read_header
-      ExifTagReader.new(exif_stream, *ifds_to_include).tags
     end
   end
 end
