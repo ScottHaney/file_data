@@ -1,13 +1,11 @@
 module FileData
   # Container for Exif tag values
   class ExifData
-    NAMES = { 0 => :image, 1 => :thumbnail }.freeze
+    SECTIONS = { 0 => :image, 1 => :thumbnail }.freeze
+    SECTIONS.each { |section| define_method(section[1]) { @hash[section[0]] } }
 
     def initialize
-      @hash = NAMES.each_with_object({}) do |pair, hash|
-        hash[pair[0]] = {}
-        self.class.send(:define_method, pair[1]) { @hash[pair[0]] }
-      end
+      @hash = SECTIONS.each_with_object({}) { |pair, hash| hash[pair[0]] = {} }
     end
 
     def add_tag(index, ifd_id, tag_id, tag_value)
