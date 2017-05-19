@@ -23,11 +23,11 @@ Examples:
 # Get Exif data from a file path or stream
 
 # Complete example with file path...
-tag_value = Exif.new.image_data_only('/path/to/file.jpg')
+tag_value = FileData::Exif.new.image_data_only('/path/to/file.jpg')
 
 # Complete example with a file stream... 
 File.open('/path/to/file.jpg', 'rb') do |f|
-  hash = Exif.new.image_data_only(f)
+  hash = FileData::Exif.new.image_data_only(f)
 end
 
 # Examples for all commands
@@ -35,14 +35,14 @@ end
 ## Commands that get multiple tag values
 
 # Get only the image Exif data
-hash = Exif.new.image_data_only(file_path_or_stream)
+hash = FileData::Exif.new.image_data_only(file_path_or_stream)
 
 # Get only the thumbnail Exif data
-hash = Exif.new.thumbnail_data_only(file_path_or_stream)
+hash = FileData::Exif.new.thumbnail_data_only(file_path_or_stream)
 
 # Get all data (image and thumbnail)
 # Use result.image or result.thumbnail to get value hashes
-result = Exif.new.all_data(file_path_or_stream)
+result = FileData::Exif.new.all_data(file_path_or_stream)
 
 ## Commands that get a single tag value
 # tag_key is section/tag_id from the description in the first paragraph
@@ -50,10 +50,10 @@ result = Exif.new.all_data(file_path_or_stream)
 # all FileData::ExifTags.tag_groups keys are given after the examples
 
 # Image example
-tag_value = Exif.new.only_image_tag(file_path_or_stream, tag_id)
+tag_value = FileData::Exif.new.only_image_tag(file_path_or_stream, tag_id)
 
 # Thumbnail example
-tag_value = Exif.new.only_thumbnail_tag(file_path_or_stream, tag_id)
+tag_value = FileData::Exif.new.only_thumbnail_tag(file_path_or_stream, tag_id)
 ```
 
 ## Known Tag Keys
