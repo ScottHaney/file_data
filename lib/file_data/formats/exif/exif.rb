@@ -16,7 +16,7 @@ module FileData
     def delegate_to_exif_reader(input, name, other_args)
       streamify(input) do |stream|
         exif = ExifJpeg.new(stream).exif
-        ExifReader.new.send(name, exif, *other_args)
+        ExifReader.new(exif).send(name, *other_args)
       end
     end
 

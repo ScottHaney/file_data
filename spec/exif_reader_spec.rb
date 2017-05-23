@@ -4,7 +4,7 @@ require 'file_data/formats/exif/exif_reader'
 require 'file_data/formats/exif/exif_stream'
 
 RSpec.describe FileData::ExifReader do
-  let(:exif) { FileData::ExifReader.new }
+  let(:exif) { FileData::ExifReader.new(exif_stream) }
   let(:exif_stream) { FileData::ExifStream.new(TestStream.get_stream(test_bytes)) }
 
   let(:both_ifds_test) do
@@ -16,51 +16,8 @@ RSpec.describe FileData::ExifReader do
      [0, 0, 0, 0]].flatten # No next IFD marker
   end
 
-  # context 'when the exif stream is empty' do
-  #   let(:test_bytes) { [] }
-
-  #   describe '#image_data_only' do
-  #     it 'delegates to exif_tags_internal(stream, 0)' do
-  #       data = FileData::ExifData.new
-  #       expect(data).to receive(:image)
-  #       expect(exif).to receive(:exif_tags_internal).with(0) { data }
-  #       exif.image_data_only
-  #     end
-  #   end
-
-  #   describe '#thumbnail_data_only' do
-  #     it 'delegates to exif_tags_internal(1)' do
-  #       data = FileData::ExifData.new
-  #       expect(data).to receive(:thumbnail)
-  #       expect(exif).to receive(:exif_tags_internal).with(1) { data }
-  #       exif.thumbnail_data_only
-  #     end
-  #   end
-
-  #   describe '#all_data' do
-  #     it 'delegates to exif_tags_internal(0, 1)' do
-  #       expect(exif).to receive(:exif_tags_internal).with(0, 1)
-  #       exif.all_data
-  #     end
-  #   end
-
-  #   describe '#only_image_tag' do
-  #     it 'delegates to exif_tag_internal(0, tag_id)' do
-  #       expect(exif).to receive(:exif_tag_internal).with(0, [:xyz, 500])
-  #       exif.only_image_tag([:xyz, 500])
-  #     end
-  #   end
-
-  #   describe '#only_thumbnail_tag' do
-  #     it 'delegates to exif_tag_internal(input, 1, tag_id)' do
-  #       expect(exif).to receive(:exif_tag_internal).with(1, [:xyz, 500])
-  #       exif.only_thumbnail_tag([:xyz, 500])
-  #     end
-  #   end
-  # end
-
   describe '#tags' do
-    let(:tags) { exif.tags(exif_stream, *ifds_to_include) }
+    let(:tags) { exif.tags(*ifds_to_include) }
 
     context 'when there is no exif data' do
       let(:exif_stream) { nil }
