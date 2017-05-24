@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    file_data (4.0.0)
+    file_data (5.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -53,4 +53,4 @@ DEPENDENCIES
   rspec (~> 3.0)
 
 BUNDLED WITH
-   1.14.3
+   1.14.6

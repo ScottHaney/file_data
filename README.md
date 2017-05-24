@@ -20,40 +20,42 @@ To read exif data a stream of the jpeg data should be used as input. For perform
 Examples:
 
 ```ruby
-# Get Exif data from a file path or stream
+## Get Exif data from a file path or stream
 
-# Complete example with file path...
-tag_value = FileData::Exif.new.image_data_only('/path/to/file.jpg')
+# The file path or stream is passed as a parameter to class methods on FileData::Exif
+# rather than having the file path or stream set in the constructor and the methods
+# be instance methods to ensure that the user falls into a "pit of success" by only
+# opening the file once to get tag values rather than potentially multiple times
 
-# Complete example with a file stream... 
+# Get image exif data from a file path...
+hash = FileData::Exif.image_data_only('/path/to/file.jpg')
+
+# Get thumbnail exif data from a file stream... 
 File.open('/path/to/file.jpg', 'rb') do |f|
-  hash = FileData::Exif.new.image_data_only(f)
+  hash = FileData::Exif.thumbnail_data_only(f)
 end
 
-# Examples for all commands
+## Extract values depending on how much data is returned
 
-## Commands that get multiple tag values
+# Image and thumbnail data are returned as a hash with keys
+# being the full tag name if it exists in FileData::ExifTags (see below listing)
+# or "#{ifd_id}-#{tag_id}" if there is no existing name for the tag in FileData::ExifTags
+image_hash = FileData::Exif.image_data_only(file_path_or_stream)
+image_description_value = image_hash[:Other_ImageDescription]
+unknown_gps_tag_value = image_hash["34853-99999"]
 
-# Get only the image Exif data
-hash = FileData::Exif.new.image_data_only(file_path_or_stream)
+thumbnail_hash = FileData::Exif.thumbnail_data_only(file_path_or_stream)
+image_width_tag_value = thumbnail_hash[:Image_Structure_Width]
+unknown_gps_tag_value = thumbnail_hash["Tiff-99999"]
 
-# Get only the thumbnail Exif data
-hash = FileData::Exif.new.thumbnail_data_only(file_path_or_stream)
+all_data = FileData::Exif.all_data(file_path_or_stream)
+image_hash = all_data.image
+thumbnail_hash = all_data.thumbnail
 
-# Get all data (image and thumbnail)
-# Use result.image or result.thumbnail to get value hashes
-result = FileData::Exif.new.all_data(file_path_or_stream)
-
-## Commands that get a single tag value
-# tag_key is section/tag_id from the description in the first paragraph
-# tag_key values can be taken from the hash keys in FileData::ExifTags.tag_groups
-# all FileData::ExifTags.tag_groups keys are given after the examples
-
-# Image example
-tag_value = FileData::Exif.new.only_image_tag(file_path_or_stream, tag_id)
-
-# Thumbnail example
-tag_value = FileData::Exif.new.only_thumbnail_tag(file_path_or_stream, tag_id)
+# For extracting only a specific tag the value is returned and the search key must be
+# an array matching the keys needed to get traverse FileData:ExifTags (see below listing)
+image_description_value = FileData::Exif.only_image_tag(file_path_or_stream, [:Tiff, 270])
+unknown_exif_tag_value = FileData::Exif.only_thumbnail_tag(file_path_or_stream, [34665, 2])
 ```
 
 ## Known Tag Keys

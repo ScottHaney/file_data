@@ -5,7 +5,7 @@ require 'support/test_stream'
 RSpec.describe FileData::Exif do
   include FakeFS::SpecHelpers
 
-  let(:exif) { FileData::Exif.new }
+  let(:exif) { FileData::Exif }
   let(:both_ifds_test) do
     [255, 216, # JPEG SOI
      255, 225, 0, 52, # APP1 marker and size
@@ -23,7 +23,7 @@ RSpec.describe FileData::Exif do
   describe '#image_data_only' do
     context 'when given an input stream' do
       it 'reads the image data' do
-        expect(exif.image_data_only(stream)).to eq(Image_Structure_Width: 1)
+        expect(FileData::Exif.image_data_only(stream)).to eq(Image_Structure_Width: 1)
       end
     end
 
