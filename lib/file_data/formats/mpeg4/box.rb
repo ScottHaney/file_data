@@ -6,7 +6,7 @@ module FileData
       # Read the header
       def read(stream)
         first_field = read_value(4, stream)
-        @type = stream.each_byte.take(4)
+        @type = stream.each_byte.take(4).map { |b| b.chr }.join
 
         @size =
           if first_field == 1

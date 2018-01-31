@@ -5,9 +5,9 @@ module FileData
   class Mpeg4
     def creation_date(stream)
       FileData::BoxStream.new(stream).boxes.each do |box|
-        if (box.type.map { |b| b.chr }.join == "moov")
+        if (box.type == "moov")
           FileData::BoxSubStream.new(stream, box).boxes.each do |sub_box|
-            if (sub_box.type.map { |b| b.chr }.join == "mvhd")
+            if (sub_box.type == "mvhd")
               version = read_value(1, stream)
               flags = read_value(3, stream)
           
