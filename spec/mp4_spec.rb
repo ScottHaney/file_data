@@ -9,7 +9,7 @@ RSpec.describe FileData::Mpeg4 do
         [[0,0,0,24], #Box size
          [109,111,111,118], #Box type of moov
          [0,0,0,16], #Size
-         [109,111,111,118], #Type
+         [109,118,104,100], #Box type of mvhd
          [1], #Version
          [0,0,0], #Flags
          [210,234,90,151]].flatten #Time of 2016-02-17 17:12:55

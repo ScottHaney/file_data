@@ -6,14 +6,16 @@ module FileData
     def creation_date(stream)
       FileData::BoxStream.new(stream).boxes.each do |box|
         if (box.type.map { |b| b.chr }.join == "moov")
-          size = read_value(4, stream)
-          type = stream.each_byte.take(4).map { |b| b.chr }.join
-          version = read_value(1, stream)
-          flags = read_value(3, stream)
+          FileData::BoxSubStream.new(stream, box).boxes.each do |sub_box|
+            if (sub_box.type.map { |b| b.chr }.join == "mvhd")
+              version = read_value(1, stream)
+              flags = read_value(3, stream)
           
-          creation_time = read_value(4, stream)
-          epoch_delta = 2082844800
-          return Time.at(creation_time - epoch_delta)
+              creation_time = read_value(4, stream)
+              epoch_delta = 2082844800
+              return Time.at(creation_time - epoch_delta)
+            end
+          end
         end
       end
     end
