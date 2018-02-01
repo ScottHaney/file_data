@@ -11,7 +11,7 @@ module FileData
               version = read_value(1, stream)
               flags = read_value(3, stream)
           
-              creation_time = read_value(4, stream)
+              creation_time = read_value(version == 1 ? 8 : 4, stream)
               epoch_delta = 2082844800
               return Time.at(creation_time - epoch_delta)
             end
