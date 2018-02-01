@@ -1,6 +1,10 @@
+require_relative '../../core_extensions/binary_extensions'
+
 module FileData
-  # Mpeg4 reader
+  # Mpeg4 box
   class Box
+      include BinaryExtensions
+
       attr_reader :size, :type
 
       # Read the header
@@ -14,11 +18,6 @@ module FileData
           else
             first_field
           end
-      end
-
-      def read_value(num_bytes, stream)
-        bytes = stream.each_byte.take(num_bytes)
-        bytes.inject { |total, val| (total << 8) + val }
       end
   end
 end

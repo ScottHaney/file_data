@@ -1,8 +1,11 @@
 require_relative 'box_stream'
+require_relative '../../core_extensions/binary_extensions'
 require 'date'
 
 module FileData
   class Mpeg4
+    include BinaryExtensions
+
     def creation_date(stream)
       FileData::BoxStream.new(stream).boxes.each do |box|
         if (box.type == "moov")
@@ -18,11 +21,6 @@ module FileData
           end
         end
       end
-    end
-
-    def read_value(num_bytes, stream)
-      bytes = stream.each_byte.take(num_bytes)
-      bytes.inject { |total, val| (total << 8) + val }
     end
   end
 end
