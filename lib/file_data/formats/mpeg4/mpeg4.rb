@@ -3,25 +3,29 @@ require_relative '../../core_extensions/binary_extensions'
 require 'date'
 
 module FileData
+  # Parses and returns metadata from an Mpeg4 file
   class Mpeg4
     include BinaryExtensions
 
     def creation_date(stream)
       FileData::BoxStream.new(stream).boxes.each do |box|
-        if (box.type == "moov")
-          FileData::BoxSubStream.new(stream, box).boxes.each do |sub_box|
-            if (sub_box.type == "mvhd")
-              version = read_value(1, stream)
-              flags = read_value(3, stream)
-          
-              creation_time = read_value(version == 1 ? 8 : 4, stream)
-              epoch_delta = 2082844800
-              return Time.at(creation_time - epoch_delta)
-            end
-          end
-        end
+        return parse_mvhd(stream, box) if box.type == 'moov'
       end
+    end
+
+    def parse_mvhd(stream, moov_box)
+      FileData::BoxSubStream.new(stream, moov_box).boxes.each do |sub_box|
+        return parse_mvhd_creation_date(stream) if sub_box.type == 'mvhd'
+      end
+    end
+
+    def parse_mvhd_creation_date(stream)
+      version = read_value(1, stream)
+      read_value(3, stream) # Flags bytes
+
+      creation_time = read_value(version == 1 ? 8 : 4, stream)
+      epoch_delta = 2_082_844_800
+      Time.at(creation_time - epoch_delta)
     end
   end
 end
-    

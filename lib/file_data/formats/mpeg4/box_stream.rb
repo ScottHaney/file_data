@@ -1,13 +1,14 @@
 require_relative 'box'
 
 module FileData
+  # Top level stream of Mpeg4 boxes
   class BoxStream
     def initialize(stream)
       @stream = stream
       @initial_pos = @stream.pos
     end
 
-    def should_stop(pos)
+    def should_stop(_pos)
       @stream.eof?
     end
 
@@ -27,6 +28,7 @@ module FileData
     end
   end
 
+  # Stream of child boxes for a parent box
   class BoxSubStream < BoxStream
     def initialize(stream, parent_box)
       super(stream)
