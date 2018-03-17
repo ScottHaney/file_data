@@ -1,9 +1,10 @@
+require 'file_data/file_types/file'
 require 'file_data/formats/mpeg4/mpeg4'
 require 'support/test_stream'
 
 RSpec.describe FileData::Mpeg4 do
   describe '#creation_date' do
-    let(:mpeg4) { FileData::Mpeg4.new }
+    let(:mpeg4) { FileData::Mpeg4 }
     let(:stream) { TestStream.get_stream(test_bytes) }
 
     context 'when given an input file with a non-v1 movie header box' do

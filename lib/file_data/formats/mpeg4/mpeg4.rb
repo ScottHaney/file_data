@@ -5,21 +5,25 @@ require 'date'
 module FileData
   # Parses and returns metadata from an Mpeg4 file
   class Mpeg4
-    include BinaryExtensions
+    extend BinaryExtensions
 
-    def creation_date(stream)
+    class << self
+      ['.mp4', '.mpeg4'].each { |e| File.info_maps[e] = self }
+    end
+
+    def self.creation_date(stream)
       FileData::BoxStream.new(stream).boxes.each do |box|
         return parse_mvhd(stream, box) if box.type == 'moov'
       end
     end
 
-    def parse_mvhd(stream, moov_box)
+    def self.parse_mvhd(stream, moov_box)
       FileData::BoxSubStream.new(stream, moov_box).boxes.each do |sub_box|
         return parse_mvhd_creation_date(stream) if sub_box.type == 'mvhd'
       end
     end
 
-    def parse_mvhd_creation_date(stream)
+    def self.parse_mvhd_creation_date(stream)
       version = read_value(1, stream)
       read_value(3, stream) # Flags bytes
 
