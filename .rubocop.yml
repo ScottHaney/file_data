@@ -8,7 +8,7 @@ Metrics/ClassLength:
   Max: 100
 EndOfLine:
   Enabled: false
-Style/BlockLength:
+Metrics/BlockLength:
   Exclude:
     - 'spec/**/*_spec.rb'
 Style/BlockComments:

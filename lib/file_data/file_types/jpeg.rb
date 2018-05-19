@@ -20,18 +20,18 @@ module FileData
       raise INVALID_HEADER_MSG unless soi == SOI_BYTES
     end
 
-    def yield_sections(e)
+    def yield_sections(enumerator)
       loop do
-        next_section_pos = yield_section(e)
+        next_section_pos = yield_section(enumerator)
         break unless section_pos?(next_section_pos)
         @stream.seek(next_section_pos)
       end
     end
 
-    def yield_section(e)
+    def yield_section(enumerator)
       section_start_pos = @stream.pos + 2
       marker, size = read_section_header
-      e.yield marker, size
+      enumerator.yield marker, size
       section_start_pos + size
     end
 

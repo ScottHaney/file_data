@@ -22,11 +22,11 @@ module FileData
       end
     end
 
-    def process_ifd(ifd, e)
+    def process_ifd(ifd, enumerator)
       # Yield the tags or just skip ahead
 
       if ifds_to_include.include?(ifd.index)
-        ifd.tags.each { |t| e.yield t }
+        ifd.tags.each { |t| enumerator.yield t }
       else
         # Avoid skipping the last ifd as this is needless work
         ifd.skip unless ifd.index == 1
