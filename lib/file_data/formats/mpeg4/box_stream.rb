@@ -1,42 +1,34 @@
 require_relative 'box'
 
 module FileData
-  # Top level stream of Mpeg4 boxes
-  class BoxStream
-    def initialize(stream)
+  class BoxesReader
+    def initialize(stream, start, should_stop)
       @stream = stream
-      @initial_pos = @stream.pos
-    end
-
-    def should_stop(_pos)
-      @stream.eof?
+      @start = start
+      @should_stop = should_stop
     end
 
     def boxes
       Enumerator.new do |e|
-        cur_pos = @initial_pos
-        until should_stop(@stream.pos)
-          @stream.seek cur_pos
-
+        cur_pos = @start
+        @stream.seek cur_pos
+        until @should_stop.call @stream
           box = FileData::Box.new
           box.read(@stream)
 
           e.yield box
           cur_pos += box.size
+          @stream.seek cur_pos
         end
       end.lazy
     end
-  end
 
-  # Stream of child boxes for a parent box
-  class BoxSubStream < BoxStream
-    def initialize(stream, parent_box)
-      super(stream)
-      @parent_box = parent_box
+    def self.for_file(stream)
+      BoxesReader.new(stream, 0, lambda { |s| s.eof? })
     end
 
-    def should_stop(pos)
-      pos >= @initial_pos + @parent_box.size
+    def self.for_box(stream, box)
+      BoxesReader.new(stream, box.content_pos, lambda { |s| s.pos >= box.content_pos + box.content_size })
     end
   end
 end

@@ -5,10 +5,11 @@ module FileData
   class Box
     include BinaryExtensions
 
-    attr_reader :size, :type
+    attr_reader :type, :content_pos, :content_size, :size
 
     def read(stream)
       first_field = read_value(4, stream)
+      marker = stream.pos
       @type = stream.each_byte.take(4).map(&:chr).join
 
       @size =
@@ -17,6 +18,9 @@ module FileData
         else
           first_field
         end
+
+      @content_pos = stream.pos
+      @content_size = @size - (@content_pos - marker)
     end
   end
 end

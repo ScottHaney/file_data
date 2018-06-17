@@ -12,13 +12,13 @@ module FileData
     end
 
     def self.creation_date(stream)
-      FileData::BoxStream.new(stream).boxes.each do |box|
+      FileData::BoxesReader.for_file(stream).boxes.each do |box|
         return parse_mvhd(stream, box) if box.type == 'moov'
       end
     end
 
     def self.parse_mvhd(stream, moov_box)
-      FileData::BoxSubStream.new(stream, moov_box).boxes.each do |sub_box|
+      FileData::BoxesReader.for_box(stream, moov_box).boxes.each do |sub_box|
         return parse_mvhd_creation_date(stream) if sub_box.type == 'mvhd'
       end
     end

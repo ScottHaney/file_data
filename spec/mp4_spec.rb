@@ -7,6 +7,13 @@ RSpec.describe FileData::Mpeg4 do
     let(:mpeg4) { FileData::Mpeg4 }
     let(:stream) { TestStream.get_stream(test_bytes) }
 
+    #context 'Given an actual file' do
+    #  let(:stream) { File.open('/home/ubuntu/code/IMG_4537.m4v', 'rb') }
+    #  it 'Reports the creation date' do
+    #    puts mpeg4.creation_date(stream)
+    #  end
+    #end
+
     context 'when given an input file with a non-v1 movie header box' do
       let(:test_bytes) do
         [[0, 0, 0, 24], # Box size
