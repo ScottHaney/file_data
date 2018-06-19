@@ -12,15 +12,8 @@ module FileData
     end
 
     def self.creation_date(stream)
-      FileData::BoxesReader.for_file(stream).boxes.each do |box|
-        return parse_mvhd(stream, box) if box.type == 'moov'
-      end
-    end
-
-    def self.parse_mvhd(stream, moov_box)
-      FileData::BoxesReader.for_box(stream, moov_box).boxes.each do |sub_box|
-        return parse_mvhd_creation_date(stream) if sub_box.type == 'mvhd'
-      end
+      box = get_box(stream, 'moov', 'mvhd')
+      return parse_mvhd_creation_date(stream) unless box.nil?
     end
 
     def self.parse_mvhd_creation_date(stream)
@@ -30,6 +23,18 @@ module FileData
       creation_time = read_value(version == 1 ? 8 : 4, stream)
       epoch_delta = 2_082_844_800
       Time.at(creation_time - epoch_delta)
+    end
+
+    def self.get_box(stream, *box_path)
+      reader = FileData::BoxesReader.for_file(stream)
+      box = nil
+      box_path.each do |part|
+        box = reader.boxes.find { |box| box.type == part }
+        return nil if box.nil?
+        reader = FileData::BoxesReader.for_box(stream, box)
+      end
+
+      return box
     end
   end
 end
