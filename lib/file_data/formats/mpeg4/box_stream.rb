@@ -28,7 +28,11 @@ module FileData
     end
 
     def self.for_box(stream, box)
-      BoxesReader.new(stream, box.content_pos, lambda { |s| s.pos >= box.content_pos + box.content_size })
+      for_position(stream, box.content_pos, box.content_size)
+    end
+
+    def self.for_position(stream, pos, size)
+      BoxesReader.new(stream, pos, lambda { |s| s.pos >= pos + size})
     end
   end
 end
