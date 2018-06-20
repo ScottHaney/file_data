@@ -39,6 +39,23 @@ module FileData
       end
     end
 
+    def self.origin_date(stream)
+      keys_box = FileData::Mpeg4.get_box(stream, 'moov', 'meta', 'keys')
+      keys = FileData::Mpeg4.keys_box(stream)
+
+      creation_key = keys.find { |key| key.value == 'com.apple.quicktime.creationdate' }
+
+      box = FileData::Mpeg4.get_box(stream, 'moov', 'meta', 'ilst')
+        
+      ilst_boxes = []
+      while stream.pos < box.content_pos + box.content_size
+        ilst_boxes << FileData::Mpeg4.ilst_box(stream)
+      end
+
+      creation_date_data = ilst_boxes.find { |box| box.index == creation_key.index }
+      DateTime.strptime(creation_date_data.value_text)
+    end
+
     def self.creation_date(stream)
       box = get_box(stream, 'moov', 'mvhd')
       return parse_mvhd_creation_date(stream) unless box.nil?
@@ -67,13 +84,13 @@ module FileData
   end
 
   class IlstBox
-    attr_reader :index, :data_type, :locale, :value_bytes
+    attr_reader :index, :data_type, :locale, :value_text
 
-    def initialize(index, data_type, locale, value_bytes)
+    def initialize(index, data_type, locale, value_text)
       @index = index
       @data_type = data_type
       @locale = locale
-      @value_bytes = value_bytes
+      @value_text = value_text
     end
   end
 
