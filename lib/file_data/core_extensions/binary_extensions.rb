@@ -4,4 +4,8 @@ module BinaryExtensions
     bytes = stream.each_byte.take(num_bytes)
     bytes.inject { |total, val| (total << 8) + val }
   end
+
+  def read_ascii(num_bytes, stream)
+    stream.each_byte.take(num_bytes).map(&:chr).join
+  end
 end

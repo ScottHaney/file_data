@@ -10,7 +10,20 @@ RSpec.describe FileData::Mpeg4 do
     #context 'Given an actual file' do
     #  let(:stream) { File.open('/home/ubuntu/code/IMG_4537.m4v', 'rb') }
     #  it 'Reports the creation date' do
-    #    puts mpeg4.creation_date(stream)
+    #    box = FileData::Mpeg4.get_box(stream, 'moov', 'meta', 'keys')
+    #    keys = FileData::Mpeg4.keys_box(stream)
+#
+    #    creation_key = keys.find { |key| key.value == 'com.apple.quicktime.creationdate' }
+#
+    #    box = FileData::Mpeg4.get_box(stream, 'moov', 'meta', 'ilst')
+    #    
+    #    ilst_boxes = []
+    #    while stream.pos < box.content_pos + box.content_size
+    #      ilst_boxes << FileData::Mpeg4.ilst_box(stream)
+    #    end
+#
+    #    creation_date_data = ilst_boxes.find { |box| box.index == creation_key.index }
+    #    puts "Value for box 4: " + creation_date_data.value_bytes.to_s
     #  end
     #end
 
