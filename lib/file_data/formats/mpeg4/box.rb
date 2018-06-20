@@ -8,8 +8,8 @@ module FileData
     attr_reader :type, :content_pos, :content_size, :size
 
     def read(stream)
-      first_field = read_value(4, stream)
       marker = stream.pos
+      first_field = read_value(4, stream)
       @type = stream.each_byte.take(4).map(&:chr).join
 
       @size =
