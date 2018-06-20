@@ -19,7 +19,7 @@ module FileData
       
       data_type = read_value(4, stream)
       locale = read_value(4, stream)
-      value = stream.each_byte.take(data_box.content_size - 8).map(&:chr).join
+      value = read_ascii(data_box.content_size - 8, stream)
 
       IlstBox.new(index, data_type, locale, value)
     end
@@ -30,16 +30,13 @@ module FileData
 
       entry_count = read_value(4, stream)
       
-      keys = []
-      entry_count.times do |index|
+      keys = entry_count.times.map do |index|
         size = read_value(4, stream)
         namespace = read_ascii(4, stream)
         value = read_ascii(size - 8, stream)
         
-        keys << Key.new(index + 1, namespace, value)
+        Key.new(index + 1, namespace, value)
       end
-
-      return keys
     end
 
     def self.creation_date(stream)

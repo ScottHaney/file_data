@@ -10,7 +10,7 @@ module FileData
     def read(stream)
       marker = stream.pos
       first_field = read_value(4, stream)
-      @type = stream.each_byte.take(4).map(&:chr).join
+      @type = read_ascii(4, stream)
 
       @size =
         if first_field == 1
