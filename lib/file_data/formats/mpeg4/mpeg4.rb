@@ -83,24 +83,6 @@ module FileData
     end
   end
 
-  class IlstBox
-    attr_reader :index, :data_type, :locale, :value_text
-
-    def initialize(index, data_type, locale, value_text)
-      @index = index
-      @data_type = data_type
-      @locale = locale
-      @value_text = value_text
-    end
-  end
-
-  class Key
-    attr_reader :index, :namespace, :value
-
-    def initialize(index, namespace, value)
-      @index = index
-      @namespace = namespace
-      @value = value
-    end
-  end
+  IlstBox = Struct.new(:index, :data_type, :locale, :value_text)
+  Key = Struct.new(:index, :namespace, :value)
 end
