@@ -7,16 +7,16 @@ RSpec.describe FileData::Mpeg4 do
     let(:mpeg4) { FileData::Mpeg4 }
     let(:stream) { TestStream.get_stream(test_bytes) }
 
-    # context 'Given an actual file' do
-    #   let(:stream) { File.open('/home/ubuntu/code/IMG_4537.m4v', 'rb') }
-    #   it 'Reports the creation date' do
-    #     date = FileData::Mpeg4.origin_date(stream)
-    #     puts "Origin Date: " + date.to_s
-    #     puts "Origin Year: " + date.year.to_s
-    #     puts "Origin Month: " + date.month.to_s
-    #     puts "Origin Day: " + date.day.to_s
-    #   end
-    # end
+    #context 'Given an actual file' do
+    #  let(:stream) { File.open('/home/ubuntu/code/IMG_4537.m4v', 'rb') }
+    #  it 'Reports the creation date' do
+    #    date = FileData::Mpeg4.origin_date(stream)
+    #    puts "Origin Date: " + date.to_s
+    #    puts "Origin Year: " + date.year.to_s
+    #    puts "Origin Month: " + date.month.to_s
+    #    puts "Origin Day: " + date.day.to_s
+    #  end
+    #end
 
     context 'when given an input file with a non-v1 movie header box' do
       let(:test_bytes) do

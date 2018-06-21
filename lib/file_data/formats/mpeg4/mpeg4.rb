@@ -40,12 +40,13 @@ module FileData
     end
 
     def self.origin_date(stream)
-      keys_box = FileData::Mpeg4.get_box(stream, 'moov', 'meta', 'keys')
+      meta_box = get_root_path(stream, 'moov', 'meta')
+      keys_box = get_box_path(stream, meta_box, 'keys')
       keys = FileData::Mpeg4.keys_box(stream)
 
       creation_key = keys.find { |key| key.value == 'com.apple.quicktime.creationdate' }
 
-      box = FileData::Mpeg4.get_box(stream, 'moov', 'meta', 'ilst')
+      box = get_box_path(stream, meta_box, 'ilst')
         
       ilst_boxes = []
       while stream.pos < box.content_pos + box.content_size
@@ -57,7 +58,7 @@ module FileData
     end
 
     def self.creation_date(stream)
-      box = get_box(stream, 'moov', 'mvhd')
+      box = get_root_path(stream, 'moov', 'mvhd')
       return parse_mvhd_creation_date(stream) unless box.nil?
     end
 
@@ -70,16 +71,26 @@ module FileData
       Time.at(creation_time - epoch_delta)
     end
 
-    def self.get_box(stream, *box_path)
+    def self.get_root_path(stream, *box_path)
       reader = FileData::BoxesReader.for_file(stream)
-      box = nil
-      box_path.each do |part|
-        box = reader.boxes.find { |box| box.type == part }
-        return nil if box.nil?
-        reader = FileData::BoxesReader.for_box(stream, box)
-      end
+      get_path(stream, reader, *box_path)
+    end
 
-      return box
+    def self.get_box_path(stream, box, *box_path)
+      reader = FileData::BoxesReader.for_box(stream, box)
+      get_path(stream, reader, *box_path)
+    end
+
+    def self.get_path(stream, reader, *box_path)
+      match = reader.boxes.find { |x| x.type == box_path[0] }
+
+      if match.nil?
+        nil
+      elsif box_path.length == 1
+        match
+      else
+        get_path(stream, FileData::BoxesReader.for_box(stream, match), *box_path[1..-1])
+      end
     end
   end
 
