@@ -14,9 +14,8 @@ module FileData
     def self.ilst_box(stream)
       size = read_value(4, stream)
       index = read_value(4, stream)
+      data_box = get_ilst_data_box(stream, size)
 
-      data_box = FileData::BoxesReader.for_position(stream, stream.pos, size - 8).boxes.find { |box| box.type == 'data' }
-      
       data_type = read_value(4, stream)
       locale = read_value(4, stream)
       value = read_ascii(data_box.content_size - 8, stream)
@@ -24,37 +23,45 @@ module FileData
       IlstBox.new(index, data_type, locale, value)
     end
 
+    def self.get_ilst_data_box(stream, size)
+      BoxesReader.for_position(stream, stream.pos, size - 8)
+                 .boxes.find { |box| box.type == 'data' }
+    end
+
     def self.keys_box(stream)
-      version = read_value(1, stream)
-      flags = read_value(3, stream)
+      read_value(1, stream) # version field
+      read_value(3, stream) # flags field
 
       entry_count = read_value(4, stream)
-      
-      keys = entry_count.times.map do |index|
+
+      Array.new(entry_count) do |index|
         size = read_value(4, stream)
         namespace = read_ascii(4, stream)
         value = read_ascii(size - 8, stream)
-        
+
         Key.new(index + 1, namespace, value)
       end
     end
 
     def self.origin_date(stream)
       meta_box = get_root_path(stream, 'moov', 'meta')
-      keys_box = get_box_path(stream, meta_box, 'keys')
-      keys = FileData::Mpeg4.keys_box(stream)
+
+      get_box_path(stream, meta_box, 'keys')
+      keys = keys_box(stream)
 
       creation_key = keys.find { |key| key.value == 'com.apple.quicktime.creationdate' }
 
-      box = get_box_path(stream, meta_box, 'ilst')
-        
-      ilst_boxes = []
-      while stream.pos < box.content_pos + box.content_size
-        ilst_boxes << FileData::Mpeg4.ilst_box(stream)
-      end
+      ilst_boxes = get_ilst_boxes(stream, meta_box)
 
-      creation_date_data = ilst_boxes.find { |box| box.index == creation_key.index }
-      DateTime.strptime(creation_date_data.value_text)
+      creation_date_data = ilst_boxes.find { |x| x.index == creation_key.index }
+      Time.parse(creation_date_data.value_text)
+    end
+
+    def self.get_ilst_boxes(stream, meta_box)
+      box = get_box_path(stream, meta_box, 'ilst')
+      ilst_boxes = []
+      ilst_boxes << ilst_box(stream) while stream.pos < box.content_pos + box.content_size
+      ilst_boxes
     end
 
     def self.creation_date(stream)

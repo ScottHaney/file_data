@@ -1,6 +1,7 @@
 require_relative 'box'
 
 module FileData
+  # Returns all boxes starting from the current position of a stream
   class BoxesReader
     def initialize(stream, start, should_stop)
       @stream = stream
@@ -24,7 +25,7 @@ module FileData
     end
 
     def self.for_file(stream)
-      BoxesReader.new(stream, 0, lambda { |s| s.eof? })
+      BoxesReader.new(stream, 0, ->(s) { s.eof? })
     end
 
     def self.for_box(stream, box)
@@ -32,7 +33,7 @@ module FileData
     end
 
     def self.for_position(stream, pos, size)
-      BoxesReader.new(stream, pos, lambda { |s| s.pos >= pos + size})
+      BoxesReader.new(stream, pos, ->(s) { s.pos >= pos + size })
     end
   end
 end
