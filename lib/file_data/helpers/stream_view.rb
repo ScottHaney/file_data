@@ -11,6 +11,15 @@ module Helpers
       @start_pos = start_pos
     end
 
+    def read_value(num_bytes)
+      bytes = @stream.each_byte.take(num_bytes)
+      bytes.inject { |total, val| (total << 8) + val }
+    end
+  
+    def read_ascii(num_bytes)
+      @stream.each_byte.take(num_bytes).map(&:chr).join
+    end
+
     def_delegators :@stream, :seek, :each_byte
   end
 
