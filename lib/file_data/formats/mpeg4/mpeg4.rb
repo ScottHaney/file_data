@@ -3,6 +3,7 @@ require_relative '../../core_extensions/binary_extensions'
 require 'date'
 require_relative 'box_parsers/ilst_box'
 require_relative 'box_parsers/keys_box'
+require_relative 'box_parsers/mvhd_box'
 
 module FileData
   # Parses and returns metadata from an Mpeg4 file
@@ -15,22 +16,22 @@ module FileData
 
     def self.origin_date(stream)
       mb = get_root_path(stream, 'moov', 'meta')
-      meta_box = MetaBoxParser.parse(mb.content_stream)
-      meta_box.creation_date
+
+      if mb.nil?
+        nil
+      else
+        MetaBoxParser.parse(mb.content_stream).creation_date
+      end
     end
 
     def self.creation_date(stream)
       box = get_root_path(stream, 'moov', 'mvhd')
-      return parse_mvhd_creation_date(stream) unless box.nil?
-    end
 
-    def self.parse_mvhd_creation_date(stream)
-      version = read_value(1, stream)
-      read_value(3, stream) # Flags bytes
-
-      creation_time = read_value(version == 1 ? 8 : 4, stream)
-      epoch_delta = 2_082_844_800
-      Time.at(creation_time - epoch_delta)
+      if box.nil?
+        nil
+      else
+        MvhdBoxParser.parse(box.content_stream).creation_time
+      end
     end
 
     def self.get_root_path(stream, *box_path)
