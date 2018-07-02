@@ -34,8 +34,8 @@ module FileData
       content_pos = stream.pos
       header_size = content_pos - start_pos
       content_size = total_size - header_size
-      
-      return type, content_pos, content_size
+
+      [type, content_pos, content_size]
     end
   end
 end

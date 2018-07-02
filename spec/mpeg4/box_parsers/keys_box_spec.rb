@@ -9,7 +9,7 @@ RSpec.describe FileData::KeysBoxParser do
     return v
   end
   let(:box) { FileData::KeysBoxParser.parse(view) }
-  
+
   describe '#parse' do
     context 'when the box has two keys' do
       let(:bytes) do
@@ -22,7 +22,7 @@ RSpec.describe FileData::KeysBoxParser do
          [0, 0, 0, 10], # key2 size
          [0, 0, 0, 0], # key2 namespace
          [118, 50]].flatten # key2 value 'v2'
-      end  
+      end
 
       it 'gets the values for both keys' do
         expect(box.length).to eq(2)

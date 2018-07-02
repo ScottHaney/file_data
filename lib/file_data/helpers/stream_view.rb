@@ -1,6 +1,7 @@
 require 'forwardable'
 
 module Helpers
+  # Abstract view of a stream
   class BaseStreamView
     extend Forwardable
 
@@ -15,7 +16,7 @@ module Helpers
       bytes = @stream.each_byte.take(num_bytes)
       bytes.inject { |total, val| (total << 8) + val }
     end
-  
+
     def read_ascii(num_bytes)
       @stream.each_byte.take(num_bytes).map(&:chr).join
     end
@@ -23,6 +24,7 @@ module Helpers
     def_delegators :@stream, :seek, :each_byte
   end
 
+  # View of a stream that has a specified size in bytes
   class SubStreamView < BaseStreamView
     attr_reader :end_pos, :size
 
@@ -41,6 +43,7 @@ module Helpers
     end
   end
 
+  # View of a stream that ends when eof? is true
   class StreamView < BaseStreamView
     def initialize(stream)
       super(stream, 0)

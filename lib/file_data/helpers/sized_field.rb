@@ -2,6 +2,7 @@ require_relative 'stream_view'
 require_relative '../core_extensions/binary_extensions'
 
 module Helpers
+  # Binary block that has a size equal to the value of its first field
   class SizedField
     include BinaryExtensions
 

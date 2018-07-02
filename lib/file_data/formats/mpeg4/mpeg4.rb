@@ -43,7 +43,7 @@ module FileData
 
     def self.get_path(stream_view, *box_path)
       match = BoxesReader.read(stream_view).find { |x| x.type == box_path[0] }
-      
+
       if match.nil?
         nil
       elsif box_path.length == 1

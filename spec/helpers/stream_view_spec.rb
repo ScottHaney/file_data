@@ -36,7 +36,7 @@ RSpec.describe Helpers::SubStreamView do
     v.seek(v.start_pos)
     return v
   end
-  
+
   let(:test_bytes) { [1, 2, 3, 4] }
   let(:start) { 1 }
   let(:size) { 2 }

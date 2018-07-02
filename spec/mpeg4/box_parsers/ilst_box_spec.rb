@@ -9,13 +9,13 @@ RSpec.describe FileData::IlstBoxParser do
     return v
   end
   let(:box) { FileData::IlstBoxParser.parse(view) }
-  
+
   describe '#parse' do
     context 'when the box has only an index field' do
       let(:bytes) do
         [[0, 0, 0, 8], # size
-         [0, 0, 0, 1]].flatten #index
-      end  
+         [0, 0, 0, 1]].flatten # index
+      end
 
       it 'parses the correct index value' do
         expect(box.index).to eq(1)

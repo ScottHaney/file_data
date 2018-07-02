@@ -3,13 +3,14 @@ require_relative '../../../helpers/stream_view'
 require_relative 'ilst_data_box'
 
 module FileData
+  # Parsers for the 'ilst' box
   class IlstBoxParser
     def self.parse(view)
       size = view.read_value(4)
       index = view.read_value(4)
-      
+
       db = find_data_box(view, size)
-      data_box = if db.nil? then nil else IlstDataBoxParser.parse(db) end
+      data_box = db.nil? ? nil : IlstDataBoxParser.parse(db)
 
       IlstBox.new(index, data_box)
     end

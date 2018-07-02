@@ -2,21 +2,28 @@ require_relative 'keys_box'
 require_relative 'ilst_box'
 require_relative '../boxes_reader'
 
-module FileData 
+module FileData
+  # Parser for the 'meta' box
   class MetaBoxParser
     def self.parse(view)
-      kb = get_path(view, 'keys')
-      keys = KeysBoxParser.parse(kb.content_stream)
-  
-      creation_key = keys.find { |key| key.value == 'com.apple.quicktime.creationdate' }
+      creation_key = get_creation_key(view)
       return MetaBox.new(nil) if creation_key.nil?
-  
-      ilst_boxes = get_ilst_boxes(view)
-  
-      creation_date_data = ilst_boxes.find { |x| x.index == creation_key.index }
+
+      creation_date_data = get_creation_date(view, creation_key.index)
       return MetaBox.new(nil) if creation_date_data.nil?
 
       MetaBox.new(Time.parse(creation_date_data.data_box.value_text))
+    end
+
+    def self.get_creation_key(view)
+      kb = get_path(view, 'keys')
+      keys = KeysBoxParser.parse(kb.content_stream)
+      keys.find { |key| key.value == 'com.apple.quicktime.creationdate' }
+    end
+
+    def self.get_creation_date(view, index)
+      ilst_boxes = get_ilst_boxes(view)
+      ilst_boxes.find { |x| x.index == index }
     end
 
     def self.get_ilst_boxes(view)
@@ -29,7 +36,7 @@ module FileData
 
     def self.get_path(stream_view, *box_path)
       match = BoxesReader.read(stream_view).find { |x| x.type == box_path[0] }
-      
+
       if match.nil?
         nil
       elsif box_path.length == 1
