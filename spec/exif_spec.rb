@@ -1,5 +1,5 @@
 require 'fakefs/spec_helpers'
-require 'file_data/file_types/file'
+require 'file_data/file_types/file_info'
 require 'file_data/formats/exif/exif'
 require 'support/test_stream'
 

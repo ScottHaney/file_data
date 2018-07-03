@@ -1,6 +1,7 @@
-require 'file_data/file_types/file'
+require 'file_data/file_types/file_info'
 require 'file_data/formats/mpeg4/mpeg4'
 require 'support/test_stream'
+
 RSpec.describe FileData::Mpeg4 do
   describe '#creation_date' do
     let(:mpeg4) { FileData::Mpeg4 }

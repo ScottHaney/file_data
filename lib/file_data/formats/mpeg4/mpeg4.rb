@@ -11,7 +11,7 @@ module FileData
     extend BinaryExtensions
 
     class << self
-      ['.mp4', '.mpeg4'].each { |e| File.info_maps[e] = self }
+      ['.mp4', '.mpeg4', '.m4v'].each { |e| FileInfo.info_maps[e] = Mpeg4 }
     end
 
     def self.origin_date(stream)

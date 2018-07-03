@@ -5,7 +5,7 @@ module FileData
   # Convenience class for extracting exif data from a file or stream
   class Exif
     class << self
-      ['.jpeg', '.jpg'].each { |e| File.info_maps[e] = self }
+      ['.jpeg', '.jpg'].each { |e| FileInfo.info_maps[e] = self }
     end
 
     # Create methods that forward to ExifReader
