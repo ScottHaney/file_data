@@ -1,6 +1,6 @@
 require_relative 'keys_box'
 require_relative 'ilst_box'
-require_relative '../boxes_reader'
+require_relative '../box_path'
 
 module FileData
   # Parser for the 'meta' box
@@ -16,7 +16,9 @@ module FileData
     end
 
     def self.get_creation_key(view)
-      kb = get_path(view, 'keys')
+      kb = BoxPath.get_path(view, 'keys')
+      return nil if kb.nil?
+
       keys = KeysBoxParser.parse(kb.content_stream)
       keys.find { |key| key.value == 'com.apple.quicktime.creationdate' }
     end
@@ -28,22 +30,10 @@ module FileData
 
     def self.get_ilst_boxes(view)
       view.seek view.start_pos
-      box = get_path(view, 'ilst')
+      box = BoxPath.get_path(view, 'ilst')
       ilst_boxes = []
       ilst_boxes << IlstBoxParser.parse(box.content_stream) until box.content_stream.eof?
       ilst_boxes
-    end
-
-    def self.get_path(stream_view, *box_path)
-      match = BoxesReader.read(stream_view).find { |x| x.type == box_path[0] }
-
-      if match.nil?
-        nil
-      elsif box_path.length == 1
-        match
-      else
-        get_path(match.content_stream, *box_path[1..-1])
-      end
     end
   end
 
