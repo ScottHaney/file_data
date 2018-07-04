@@ -78,4 +78,15 @@ RSpec.describe FileData::ExifReader do
       end
     end
   end
+
+  # This test exercises the conditional branch in ExifReader.exif_tag_internal
+  describe '#only_image_tag' do
+    context 'when searching for an image tag that does not exist' do
+      let(:test_bytes) { both_ifds_test }
+
+      it 'returns nil' do
+        expect(exif.only_image_tag([:DoesNotExist, 1234])).to be_nil
+      end
+    end
+  end
 end
