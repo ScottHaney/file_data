@@ -33,7 +33,7 @@ module FileData
       end
     end
 
-    def creation_date(input)
+    def self.creation_date(input)
       FileData::Exif.only_image_tag(input, [34_665, 36_867])
     end
   end
