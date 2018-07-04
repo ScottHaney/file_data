@@ -13,11 +13,24 @@ RSpec.describe FileData::MvhdBoxParser do
 
   describe '#parse' do
     context 'when there is an eight byte long creation date' do
-      let(:time) { Time.at(-2_082_844_800) }
+      let(:time) { Time.at(-2_082_844_800 + 1) }
       let(:bytes) do
         [1, # version
          [0, 0, 0], # flags bytes
-         [0, 0, 0, 0, 0, 0, 0, 0]].flatten # creation time since epoch
+         [0, 0, 0, 0, 0, 0, 0, 1]].flatten # creation time since epoch
+      end
+
+      it 'gets the creation date' do
+        expect(box.creation_time).to eq(time)
+      end
+    end
+
+    context 'when there is a four byte long creation date' do
+      let(:time) { Time.at(-2_082_844_800 + 1) }
+      let(:bytes) do
+        [1, # version
+         [0, 0, 0], # flags bytes
+         [0, 0, 0, 1]].flatten # creation time since epoch
       end
 
       it 'gets the creation date' do
