@@ -4,31 +4,32 @@ require_relative 'box_parsers/meta_box'
 require_relative 'box_parsers/mvhd_box'
 
 module FileData
+  Mpeg4ValueInfo = Struct.new(:name, :parser_class, :method_name, :box_path)
+
   # Parses and returns metadata from an Mpeg4 file
   class Mpeg4
     extend BinaryExtensions
 
     class << self
       ['.mp4', '.mpeg4', '.m4v'].each { |e| FileInfo.info_maps[e] = Mpeg4 }
-    end
 
-    def self.origin_date(stream)
-      mb = BoxPath.get_root_path(stream, 'moov', 'meta')
+      values = [ Mpeg4ValueInfo.new('origin_date', MetaBoxParser, 'creation_date', ['moov', 'meta']),
+                Mpeg4ValueInfo.new('creation_date', MvhdBoxParser, 'creation_time', ['moov', 'mvhd'])]
 
-      if mb.nil?
-        nil
-      else
-        MetaBoxParser.parse(mb.content_stream).creation_date
+      values.each do |v|
+        define_method(v.name) do |stream|
+          get_value(stream, v.parser_class, v.method_name, *v.box_path)
+        end
       end
     end
-
-    def self.creation_date(stream)
-      box = BoxPath.get_root_path(stream, 'moov', 'mvhd')
+    
+    def self.get_value(stream, parser, method, *box_path)
+      box = BoxPath.get_root_path(stream, *box_path)
 
       if box.nil?
         nil
       else
-        MvhdBoxParser.parse(box.content_stream).creation_time
+        parser.parse(box.content_stream).send(method)
       end
     end
   end
