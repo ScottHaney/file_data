@@ -1,6 +1,7 @@
 require_relative 'boxes_reader'
 
 module FileData
+  # Finds Mpeg4 boxes within a stream
   class BoxPath
     def self.get_root_path(stream, *box_path)
       get_path(Helpers::StreamView.new(stream), *box_path)

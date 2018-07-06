@@ -43,7 +43,7 @@ RSpec.describe FileData::Mpeg4 do
          [0, 0, 0], # Flags
          [210, 234, 90, 151]].flatten # Time of 2016-02-17 17:12:55
       end
-    
+
       it 'extracts the creation date' do
         expect(mpeg4.creation_date(stream)).to eq(Time.new(2016, 2, 17, 17, 12, 55))
       end

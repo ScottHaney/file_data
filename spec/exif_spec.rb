@@ -18,7 +18,7 @@ RSpec.describe FileData::Exif do
      255, 217].flatten # JPEG EOI
   end
   let(:stream) { TestStream.get_stream(both_ifds_test) }
-  
+
   context 'tests using the fake file system helpers' do
     include FakeFS::SpecHelpers
 
@@ -28,38 +28,38 @@ RSpec.describe FileData::Exif do
           expect(FileData::Exif.image_data_only(stream)).to eq(Image_Structure_Width: 1)
         end
       end
-  
+
       context 'when given an input file' do
         let(:test_file) { '/test.jpg' }
         before do
           File.open(test_file, 'w') { |f| f.write both_ifds_test.pack('C*') }
         end
-  
+
         it 'reads the image data' do
           expect(exif.image_data_only(test_file)).to eq(Image_Structure_Width: 1)
         end
       end
     end
-  
+
     describe '#thumbnail_data_only' do
       context 'when given an input stream' do
         it 'reads the thumbnail data' do
           expect(exif.thumbnail_data_only(stream)).to eq(Image_Structure_Length: 2)
         end
       end
-  
+
       context 'when given an input file' do
         let(:test_file) { '/test.jpg' }
         before do
           File.open(test_file, 'w') { |f| f.write both_ifds_test.pack('C*') }
         end
-  
+
         it 'reads the thumbnail data' do
           expect(exif.thumbnail_data_only(test_file)).to eq(Image_Structure_Length: 2)
         end
       end
     end
-  
+
     describe '#all_data' do
       context 'when given an input stream' do
         it 'reads the image data' do
@@ -69,7 +69,7 @@ RSpec.describe FileData::Exif do
         end
       end
     end
-  
+
     describe '#only_image_tag' do
       context 'when given an input stream' do
         it 'reads the image data' do
@@ -77,7 +77,7 @@ RSpec.describe FileData::Exif do
         end
       end
     end
-  
+
     describe '#only_thumbnail_tag' do
       context 'when given an input stream' do
         it 'reads the image data' do
@@ -85,7 +85,7 @@ RSpec.describe FileData::Exif do
         end
       end
     end
-  
+
     describe '#creation_date' do
       context 'given an image without a creation date tag' do
         it 'returns nil' do

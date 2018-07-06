@@ -25,7 +25,7 @@ RSpec.describe FileData::Box do
     context 'when more than one field is needed for the size of the box' do
       let(:bytes) do
         [[0, 0, 0, 1], # size field 1
-        [100, 97, 116, 97], # type
+         [100, 97, 116, 97], # type
          [0, 0, 0, 0, 0, 0, 0, 20], # size field 2
          [100, 97, 116, 97]].flatten # content
       end
