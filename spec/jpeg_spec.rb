@@ -2,11 +2,11 @@ require 'support/test_stream'
 require 'file_data/file_types/jpeg'
 
 RSpec.describe FileData::Jpeg do
-  let(:jpeg) { FileData::Jpeg.new(stream) }
+  let(:jpeg) { FileData::Jpeg }
   let(:stream) { TestStream.get_stream(test_bytes) }
 
   describe '#each_section' do
-    let(:each_section) { jpeg.each_section }
+    let(:each_section) { jpeg.each_section(stream) }
 
     context 'when the jpeg SOI bytes are missing' do
       let(:test_bytes) { [255, 215] }

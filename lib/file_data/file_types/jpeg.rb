@@ -6,44 +6,42 @@ module FileData
     INVALID_HEADER_MSG = 'the given file is not a jpeg file since it does not'\
      'begin with the start of image (SOI) bytes.'.freeze
 
-    def initialize(stream)
-      @stream = stream
+    def self.each_section(stream)
+      read_header(stream)
+      Enumerator.new { |e| yield_sections(stream, e) }.lazy
     end
 
-    def each_section
-      read_header
-      Enumerator.new { |e| yield_sections(e) }.lazy
-    end
+    private
 
-    def read_header
-      soi = @stream.each_byte.take(SOI_BYTES.size)
+    def self.read_header(stream)
+      soi = stream.each_byte.take(SOI_BYTES.size)
       raise INVALID_HEADER_MSG unless soi == SOI_BYTES
     end
 
-    def yield_sections(enumerator)
+    def self.yield_sections(stream, enumerator)
       loop do
-        next_section_pos = yield_section(enumerator)
-        break unless section_pos?(next_section_pos)
-        @stream.seek(next_section_pos)
+        next_section_pos = yield_section(stream, enumerator)
+        break unless section_pos?(stream, next_section_pos)
+        stream.seek(next_section_pos)
       end
     end
 
-    def yield_section(enumerator)
-      section_start_pos = @stream.pos + 2
-      marker, size = read_section_header
+    def self.yield_section(stream, enumerator)
+      section_start_pos = stream.pos + 2
+      marker, size = read_section_header(stream)
       enumerator.yield marker, size
       section_start_pos + size
     end
 
-    def section_pos?(section_pos)
+    def self.section_pos?(stream, section_pos)
       # Make sure that there are enough bytes for a section header.
       # This also handles an ending two byte JPEG EOI sequence.
-      @stream.size - section_pos >= SECTION_HEADER_SIZE
+      stream.size - section_pos >= SECTION_HEADER_SIZE
     end
 
-    def read_section_header
-      [@stream.each_byte.take(2),
-       @stream.each_byte.take(2).inject { |a, v| (a << 8) + v }]
+    def self.read_section_header(stream)
+      [stream.each_byte.take(2),
+       stream.each_byte.take(2).inject { |a, v| (a << 8) + v }]
     end
   end
 end

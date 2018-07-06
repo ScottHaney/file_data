@@ -16,7 +16,7 @@ module FileData
     end
 
     def seek_exif
-      Jpeg.new(@stream).each_section
+      Jpeg.each_section(@stream)
           .select { |marker, _| exif_section?(marker) }
           .first
     end
