@@ -16,7 +16,7 @@ module FileData
     end
 
     def read_header
-      soi = read_bytes(SOI_BYTES.size)
+      soi = @stream.each_byte.take(SOI_BYTES.size)
       raise INVALID_HEADER_MSG unless soi == SOI_BYTES
     end
 
@@ -42,11 +42,8 @@ module FileData
     end
 
     def read_section_header
-      [read_bytes(2), read_bytes(2).inject { |a, v| (a << 8) + v }]
-    end
-
-    def read_bytes(num_bytes)
-      @stream.each_byte.take(num_bytes)
+      [@stream.each_byte.take(2),
+       @stream.each_byte.take(2).inject { |a, v| (a << 8) + v }]
     end
   end
 end
