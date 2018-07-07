@@ -21,14 +21,20 @@ RSpec.describe FileData::Jpeg do
       context 'and there are no jpeg EOI bytes' do
         let(:test_bytes) { no_eoi_bytes }
         it 'returns both jpeg sections' do
-          expect(each_section.to_a).to eq([[[255, 1], 2], [[255, 2], 2]])
+          sections = each_section.to_a
+          expect(sections.length).to eq(2)
+          expect(sections[0].marker).to eq([255, 1])
+          expect(sections[1].marker).to eq([255, 2])
         end
       end
 
       context 'and the jpeg EOI bytes exist' do
         let(:test_bytes) { no_eoi_bytes + [255, 217] }
         it 'returns both jpeg sections' do
-          expect(each_section.to_a).to eq([[[255, 1], 2], [[255, 2], 2]])
+          sections = each_section.to_a
+          expect(sections.length).to eq(2)
+          expect(sections[0].marker).to eq([255, 1])
+          expect(sections[1].marker).to eq([255, 2])
         end
       end
     end

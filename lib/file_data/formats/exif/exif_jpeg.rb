@@ -15,14 +15,20 @@ module FileData
       ExifStream.new(@stream) if seek_exif
     end
 
+    private
+
     def seek_exif
       Jpeg.each_section(@stream)
-          .select { |marker, _| exif_section?(marker) }
+          .select { |section| exif_section?(section) }
           .first
     end
 
-    def exif_section?(marker)
-      marker == APP1_BYTES && @stream.each_byte.take(EXIF_ID.size) == EXIF_ID
+    def exif_section?(section)
+      section.marker == APP1_BYTES and read_exif_id(section)
+    end
+
+    def read_exif_id(section)
+      section.content_stream.each_byte.take(EXIF_ID.size) == EXIF_ID
     end
   end
 end
