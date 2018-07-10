@@ -11,18 +11,18 @@ RSpec.describe FileData::ExifStream do
     context 'given a valid big endian header' do
       let(:test_bytes) { [77, 77, 0, 42] }
 
-      it 'sets @is_big_endian to true' do
+      it 'sets @is_little_endian to false' do
         read_header
-        expect(exif_stream.instance_variable_get(:@is_big_endian)).to be true
+        expect(exif_stream.instance_variable_get(:@is_little_endian)).to be false
       end
     end
 
     context 'given a valid little endian header' do
       let(:test_bytes) { [73, 73, 42, 0] }
 
-      it 'sets @is_big_endian to false' do
+      it 'sets @is_little_endian to true' do
         read_header
-        expect(exif_stream.instance_variable_get(:@is_big_endian)).to be false
+        expect(exif_stream.instance_variable_get(:@is_little_endian)).to be true
       end
     end
 
@@ -44,16 +44,16 @@ RSpec.describe FileData::ExifStream do
   end
 
   # Each test in this block is repeated for both little and big endian byte orders
-  [['little endian', true], ['big endian', false]].each do |endian_name, is_big_endian|
+  [['little endian', true], ['big endian', false]].each do |endian_name, is_little_endian|
     context "given that exif data is in the #{endian_name} layout" do
       # Converts big_endian_test_bytes for an example into the proper endianess.
       # Entries that are Arrays are affected by endianess and entries that are numbers are not.
       let(:test_bytes) do
         endian_bytes =
-          if is_big_endian
-            big_endian_test_bytes
-          else
+          if is_little_endian
             big_endian_test_bytes.map { |v| v.is_a?(Array) ? v.reverse : v }
+          else
+            big_endian_test_bytes
           end
         endian_bytes.flatten
       end
@@ -62,7 +62,7 @@ RSpec.describe FileData::ExifStream do
         shared_examples_for 'a tag record that has a value of' do |value|
           it do
             es = exif_stream
-            es.instance_variable_set(:@is_big_endian, is_big_endian)
+            es.instance_variable_set(:@is_little_endian, is_little_endian)
             expect(es.read_tag_value).to eq(value)
           end
         end
@@ -113,7 +113,7 @@ RSpec.describe FileData::ExifStream do
 
           describe 'that is a TYPE_UNDEFINED record plus the value' do
             let(:big_endian_test_bytes) { [[0, 7], [0, 0, 0, 6], [0, 0, 0, 10]] + raw_value }
-            it_behaves_like 'a tag record that has a value of', [[72, 101, 108, 108, 111, 0], is_big_endian]
+            it_behaves_like 'a tag record that has a value of', [[72, 101, 108, 108, 111, 0], is_little_endian]
           end
         end
 
@@ -128,7 +128,7 @@ RSpec.describe FileData::ExifStream do
 
           describe 'that is a TYPE_UNDEFINED record' do
             let(:big_endian_test_bytes) { [[0, 7], [0, 0, 0, 4]] + raw_value }
-            it_behaves_like 'a tag record that has a value of', [[67, 97, 114, 0], is_big_endian]
+            it_behaves_like 'a tag record that has a value of', [[67, 97, 114, 0], is_little_endian]
           end
         end
       end

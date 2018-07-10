@@ -28,10 +28,10 @@ module FileData
     end
 
     def read_header
-      @is_big_endian =
+      @is_little_endian =
         case @stream.each_byte.take(2)
-        when INTEL_BYTES then false
-        when MOTOROLLA_BYTES then true
+        when INTEL_BYTES then true
+        when MOTOROLLA_BYTES then false
         else raise 'the byte order bytes did not match any expected value'
         end
 
@@ -63,7 +63,7 @@ module FileData
     end
 
     def read_undefined(size)
-      [read_raw_val(size), @is_big_endian]
+      [read_raw_val(size), @is_little_endian]
     end
 
     def read_raw_val(size)
@@ -98,7 +98,7 @@ module FileData
 
     def read_value(num_bytes)
       bytes = @stream.each_byte.take(num_bytes)
-      bytes.reverse! unless @is_big_endian
+      bytes.reverse! if @is_little_endian
 
       bytes.inject { |total, val| (total << 8) + val }
     end
