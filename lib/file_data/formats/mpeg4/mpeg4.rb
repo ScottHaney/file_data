@@ -1,5 +1,4 @@
 require_relative 'box_path'
-require_relative '../../core_extensions/binary_extensions'
 require_relative 'box_parsers/meta_box'
 require_relative 'box_parsers/mvhd_box'
 
@@ -8,7 +7,6 @@ module FileData
 
   # Parses and returns metadata from an Mpeg4 file
   class Mpeg4
-    extend BinaryExtensions
 
     class << self
       ['.mp4', '.mpeg4', '.m4v'].each { |e| FileInfo.info_maps[e] = Mpeg4 }
