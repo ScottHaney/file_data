@@ -2,6 +2,8 @@
 module BinaryExtensions
   def read_value(num_bytes)
     bytes = each_byte.take(num_bytes)
+    bytes.reverse! if @is_little_endian
+
     bytes.inject { |total, val| (total << 8) + val }
   end
 

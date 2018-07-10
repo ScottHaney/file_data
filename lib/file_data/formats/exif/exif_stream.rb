@@ -1,8 +1,11 @@
 require 'forwardable'
+require_relative '../../core_extensions/binary_extensions'
 
 module FileData
   # Wraps a stream with exif specific logic
   class ExifStream
+    include BinaryExtensions
+
     MOTOROLLA_BYTES = 'MM'.bytes.to_a.freeze
     INTEL_BYTES = 'II'.bytes.to_a.freeze
 
@@ -20,7 +23,7 @@ module FileData
     VALUE_OFFSET_SIZE = 4
 
     extend Forwardable
-    def_delegators :@stream, :seek, :pos
+    def_delegators :@stream, :seek, :pos, :each_byte
 
     def initialize(stream)
       @stream = stream
@@ -94,13 +97,6 @@ module FileData
 
     def to_slong(raw_value)
       -(raw_value & HIGH_BIT_MASK) + (raw_value & ~HIGH_BIT_MASK)
-    end
-
-    def read_value(num_bytes)
-      bytes = @stream.each_byte.take(num_bytes)
-      bytes.reverse! if @is_little_endian
-
-      bytes.inject { |total, val| (total << 8) + val }
     end
   end
 end
