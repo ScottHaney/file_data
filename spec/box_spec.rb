@@ -3,7 +3,11 @@ require 'support/test_stream'
 require 'file_data/helpers/stream_view'
 
 RSpec.describe FileData::Box do
-  let(:view) { TestStream.get_stream(bytes) }
+  let(:view) do
+    v = Helpers::StreamView.new(TestStream.get_stream(bytes))
+    v.seek(v.start_pos)
+    return v
+  end
   let(:box) { FileData::Box.parse(view) }
 
   describe '#parse' do

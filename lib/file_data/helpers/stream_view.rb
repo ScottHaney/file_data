@@ -1,9 +1,11 @@
 require 'forwardable'
+require_relative '../core_extensions/binary_extensions'
 
 module Helpers
   # Abstract view of a stream
   class BaseStreamView
     extend Forwardable
+    include BinaryExtensions
 
     attr_reader :stream, :start_pos
 
@@ -12,16 +14,7 @@ module Helpers
       @start_pos = start_pos
     end
 
-    def read_value(num_bytes)
-      bytes = @stream.each_byte.take(num_bytes)
-      bytes.inject { |total, val| (total << 8) + val }
-    end
-
-    def read_ascii(num_bytes)
-      @stream.each_byte.take(num_bytes).map(&:chr).join
-    end
-
-    def_delegators :@stream, :seek, :each_byte
+    def_delegators :@stream, :seek, :each_byte, :pos
   end
 
   # View of a stream that has a specified size in bytes
@@ -35,11 +28,11 @@ module Helpers
     end
 
     def remaining_bytes
-      @end_pos - @stream.pos + 1
+      @end_pos - pos + 1
     end
 
     def eof?
-      @stream.pos > @end_pos
+      pos > @end_pos
     end
   end
 

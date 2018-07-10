@@ -8,7 +8,7 @@ module FileData
       Enumerator.new do |e|
         view.seek view.start_pos
         until view.eof?
-          box = Box.parse(view.stream)
+          box = Box.parse(view)
 
           e.yield box
           view.seek box.end_pos + 1
