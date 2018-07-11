@@ -32,7 +32,7 @@ module Helpers
     end
 
     def eof?
-      pos > @end_pos
+      pos > @end_pos or @stream.eof?
     end
   end
 
