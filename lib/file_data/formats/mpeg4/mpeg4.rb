@@ -25,12 +25,7 @@ module FileData
 
     def self.get_value(stream, parser, method, *box_path)
       box = BoxPath.get_root_path(stream, *box_path)
-
-      if box.nil?
-        nil
-      else
-        parser.parse(box.content_stream).send(method)
-      end
+      parser.parse(box.content_stream).send(method) unless box.nil?
     end
   end
 end
