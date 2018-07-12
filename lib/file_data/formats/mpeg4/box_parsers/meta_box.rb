@@ -1,6 +1,7 @@
 require_relative 'keys_box'
 require_relative 'ilst_box'
 require_relative '../box_path'
+require 'time'
 
 module FileData
   # Parser for the 'meta' box
