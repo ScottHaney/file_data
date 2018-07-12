@@ -3,18 +3,15 @@ require_relative 'box_parsers/meta_box'
 require_relative 'box_parsers/mvhd_box'
 
 module FileData
-  Mpeg4ValueInfo = Struct.new(:name, :parser_class, :method_name, :box_path)
-
   # Parses and returns metadata from an Mpeg4 file
   class Mpeg4
-
     class << self
       ['.mp4', '.mpeg4', '.m4v'].each { |e| FileInfo.info_maps[e] = Mpeg4 }
 
       values = [['origin_date', MetaBoxParser,
-                                   'creation_date', 'moov', 'meta'],
+                 'creation_date', 'moov', 'meta'],
                 ['creation_date', MvhdBoxParser,
-                                   'creation_time', 'moov', 'mvhd']]
+                 'creation_time', 'moov', 'mvhd']]
 
       values.each do |v|
         define_method(v[0]) do |stream|
@@ -28,4 +25,6 @@ module FileData
       parser.parse(box.content_stream).send(method) unless box.nil?
     end
   end
+
+  Mpeg4ValueInfo = Struct.new(:name, :parser_class, :method_name, :box_path)
 end

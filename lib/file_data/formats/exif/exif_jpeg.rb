@@ -24,7 +24,7 @@ module FileData
     end
 
     def exif_section?(section)
-      section.marker == APP1_BYTES and read_exif_id(section)
+      section.marker == APP1_BYTES && read_exif_id(section)
     end
 
     def read_exif_id(section)
