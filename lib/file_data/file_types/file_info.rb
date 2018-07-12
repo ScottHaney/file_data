@@ -8,7 +8,9 @@ module FileData
     @info_maps ||= {}
 
     def self.creation_date(filename)
-      reader_class(filename).send('creation_date', filename)
+      File.open(filename, 'rb') do |stream|
+        reader_class(filename).creation_date(stream)
+      end
     end
 
     def self.origin_date(filename)
