@@ -4,9 +4,7 @@ require_relative 'exif_jpeg'
 module FileData
   # Convenience class for extracting exif data from a file or stream
   class Exif
-    class << self
-      ['.jpeg', '.jpg'].each { |e| FileInfo.info_maps[e] = self }
-    end
+    ['.jpeg', '.jpg'].each { |e| FileInfo.info_maps[e] = Exif }
 
     # Create methods that forward to ExifReader
     # Each method requires the stream as a parameter to help the user
