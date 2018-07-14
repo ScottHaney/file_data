@@ -1,5 +1,6 @@
 require_relative 'exif_reader'
 require_relative 'exif_jpeg'
+require 'time'
 
 module FileData
   # Convenience class for extracting exif data from a file or stream
@@ -33,7 +34,7 @@ module FileData
 
     def self.creation_date(input)
       raw_tag = FileData::Exif.only_image_tag(input, [34_665, 36_867])
-      raw_tag.nil? ? nil : DateTime.strptime(raw_tag, '%Y:%m:%d %H:%M:%S')
+      raw_tag.nil? ? nil : Time.parse(raw_tag)
     end
 
     def self.origin_date(input)
