@@ -32,7 +32,8 @@ module FileData
     end
 
     def self.creation_date(input)
-      FileData::Exif.only_image_tag(input, [34_665, 36_867])
+      raw_tag = FileData::Exif.only_image_tag(input, [34_665, 36_867])
+      DateTime.strptime(raw_tag, '%Y:%m:%d %H:%M:%S')
     end
 
     def self.origin_date(input)
