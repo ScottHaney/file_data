@@ -6,7 +6,7 @@ module FileData
   # Parses and returns metadata from an Mpeg4 file
   class Mpeg4
     class << self
-      ['.mp4', '.mpeg4', '.m4v'].each { |e| FileInfo.info_maps[e] = Mpeg4 }
+      ['.mp4', '.mpeg4', '.m4v', '.mov'].each { |e| FileInfo.info_maps[e] = Mpeg4 }
 
       values = [['origin_date', MetaBoxParser,
                  'creation_date', 'moov', 'meta'],
