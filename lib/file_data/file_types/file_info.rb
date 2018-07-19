@@ -15,6 +15,9 @@ module FileData
 
     def self.origin_date(filename)
       File.open(filename, 'rb') do |stream|
+        reader = reader_class(filename)
+        raise "No metadata parser class found for the file #{filename}" if reader.nil?
+        
         reader_class(filename).origin_date(stream)
       end
     end
