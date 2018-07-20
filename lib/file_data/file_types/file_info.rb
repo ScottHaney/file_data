@@ -7,18 +7,14 @@ module FileData
 
     @info_maps ||= {}
 
-    def self.creation_date(filename)
-      File.open(filename, 'rb') do |stream|
-        reader_class(filename).creation_date(stream)
-      end
-    end
-
-    def self.origin_date(filename)
-      File.open(filename, 'rb') do |stream|
-        reader = reader_class(filename)
-        raise "No metadata parser class found for the file #{filename}" if reader.nil?
-
-        reader_class(filename).origin_date(stream)
+    ['creation_date', 'origin_date'].each do |method_name|
+      define_singleton_method(method_name) do |filename|
+        File.open(filename, 'rb') do |stream|
+          reader = reader_class(filename)
+          raise "No metadata parser class found for the file #{filename}" if reader.nil?
+  
+          reader_class(filename).send(method_name, stream)
+        end
       end
     end
 
