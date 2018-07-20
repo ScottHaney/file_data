@@ -42,12 +42,12 @@ RSpec.describe FileData::FileInfo do
        [77, 77], [0, 42], # Exif big endian header
        [0, 0, 0, 8], [0, 1], # IFD0 offset and tag count
        [135, 105], [0, 4], [0, 0, 0, 4], [0, 0, 0, 26],
-       [0, 0, 0, 0], #No next IFD marker
-       [0, 1], #Number of IFD tags
-       [144, 3], [0, 2], [0, 0, 0, 19], [0, 0, 0, 44], #Creation Date Tag
        [0, 0, 0, 0], # No next IFD marker
-       [50, 48, 49, 56, 58, 48, 49, 58, 50, 48, 32, 49, 50, 58, 48, 48, 58, 48, 48], #Creation Date Value '2018:01:20 12:00:00'
-       [255, 217]].flatten #JPEG EOI
+       [0, 1], # Number of IFD tags
+       [144, 3], [0, 2], [0, 0, 0, 19], [0, 0, 0, 44], # Creation Date Tag
+       [0, 0, 0, 0], # No next IFD marker
+       [50, 48, 49, 56, 58, 48, 49, 58, 50, 48, 32, 49, 50, 58, 48, 48, 58, 48, 48], # Creation Date Value '2018:01:20 12:00:00'
+       [255, 217]].flatten # JPEG EOI
     end
 
     before :example do
@@ -61,7 +61,7 @@ RSpec.describe FileData::FileInfo do
 
     context 'given a jpeg file with a creation date of 2018:01:20 12:00:00' do
       let(:filename) { '/test.jpg' }
-      
+
       it 'extracts the creation date from the jpeg file' do
         expect(origin_date).to eq(DateTime.strptime('2018:01:20 12:00:00', '%Y:%m:%d %H:%M:%S'))
       end
