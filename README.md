@@ -8,9 +8,23 @@ file_data
 
 Ruby library that reads file metadata.
 
-Current support
+The api provides a basic usage and an advanced usage. The basic usage will reopen and reparse the file every time it is called which is no problem when reading a single value but can be a performance drain for multiple values. The advanced usage allows the user to grab more than one value without having to read the file more than once.
 
-* Exif: Only jpeg files are supported and FlashPix extensions are not supported
+## Basic Usage
+
+```ruby
+filepath = '...' # Path to a jpeg or mpeg4 file
+
+# Get the date when the file content originated. When a photo was taken, when a movie was recorded, etc
+FileData::FileInfo.origin_date(filepath)
+
+# Get the date when the file was considered to be created. This is usually tied in some way to when the file itself was created on a disk somewhere (not usually as useful as origin date)
+FileData::FileInfo.creation_date(filepath)
+```
+
+## Advanced Usage
+
+Varies by file format type. Currently there are low level classes for parsing exif and mpeg4 metadata
 
 ## Exif documentation
 
@@ -222,4 +236,17 @@ FileData::ExifTags.tag_groups[40_965] =
   }
 ```
 
+## Mpeg4 documentation
 
+```ruby
+
+filepath = '...' # path to an mpeg4 file
+File.open(filepath, 'rb') do |stream|
+  parser = FileData::MvhdBoxParser # class that parses the box you want
+  method = :creation_time # attribute to get from the parse result
+  box_path = ['moov', 'mvhd'] # path to get to the box that you want
+
+  # final result that you are looking for
+  result = FileData::Mpeg4.get_value(stream, parser, method, *box_path)
+end
+```
