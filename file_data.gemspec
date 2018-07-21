@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Scott"]
   spec.email         = [""]
 
-  spec.summary       = %q{Extracts file metadata information (currently only supports exif metadata for jpeg files)}
-  spec.description   = %q{Extracts file metadata information (currently only supports exif metadata for jpeg files)}
+  spec.summary       = %q{Provides apis for extracting common metadata out of files as well as low level apis for advanced metadata parsing. Currently exif (jpeg/jpg) is almost entirely supported and mpeg4 (mp4,m4v,moov...) has limited support}
+  spec.description   = %q{For common metadata the FileInfo class provides methods names after the metadata items taking a filename. As an example, to get the origin date of a file you would call FileData::FileInfo.origin_date(filename). Advanced apis are provided via specific classes for each metadata type. For example, Exif for exif data and Mpeg4 for mpeg4 data. These can be used to improve the performance of gathering multiple metadata values from a file}
   spec.homepage      = ""
   spec.license       = "MIT"
 
