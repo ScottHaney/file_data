@@ -63,7 +63,7 @@ RSpec.describe FileData::FileInfo do
       let(:filename) { '/test.jpg' }
 
       it 'extracts the creation date from the jpeg file' do
-        expect(origin_date).to eq(DateTime.strptime('2018:01:20 12:00:00', '%Y:%m:%d %H:%M:%S'))
+        expect(origin_date).to eq(Time.strptime('2018:01:20 12:00:00', '%Y:%m:%d %H:%M:%S'))
       end
     end
 
