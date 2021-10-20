@@ -8,7 +8,6 @@ RUN apk update && apk upgrade && \
     apk add --update gcc && \
     apk add libc-dev
 
-#COPY . /tmp/code
-#RUN cd /tmp/code
+WORKDIR /tmp/code
 
 CMD [ "/bin/sh" ]
