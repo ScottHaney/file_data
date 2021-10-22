@@ -14,7 +14,7 @@ module FileData
           self[:Image_Structure_Width]
         end
 
-        def height
+        def length
           self[:Image_Structure_Length]
         end
       end
