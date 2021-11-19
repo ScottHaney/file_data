@@ -8,8 +8,7 @@ module FileData
       @hash = SECTIONS.each_with_object({}) { |pair, hash| hash[pair[0]] = {} }
 
       #Add some convenience methods to the image data
-      image_hash = @hash[0]
-      class << image_hash
+      class << image
         def width
           self[:Image_Structure_Width]
         end
@@ -21,8 +20,8 @@ module FileData
     end
 
     def add_tag(index, ifd_id, tag_id, tag_value)
-      name = ExifTags.get_tag_name(ifd_id, tag_id)
-      @hash[index][name] = tag_value
+      name_info = ExifTags.get_tag_name(ifd_id, tag_id)
+      @hash[index][name_info.name] = tag_value
     end
   end
 end

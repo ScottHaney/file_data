@@ -1,11 +1,14 @@
 module FileData
+  TagNameInfo = Struct.new(:name, :is_known);
+
   # Contains tag number to name information taken from the exif spec
   class ExifTags
     singleton_class.class_eval { attr_accessor :tag_groups }
     @tag_groups = {}
 
     def self.get_tag_name(ifd_id, tag_id)
-      get_known_name(ifd_id, tag_id) || "#{ifd_id}-#{tag_id}".to_sym
+      known_name = get_known_name(ifd_id, tag_id)
+      TagNameInfo.new(known_name || "#{ifd_id}-#{tag_id}".to_sym, known_name != nil)
     end
 
     def self.get_known_name(ifd_id, tag_id)

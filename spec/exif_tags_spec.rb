@@ -11,7 +11,8 @@ RSpec.describe FileData::ExifTags do
       let(:tag_id) { 0 }
 
       it 'returns the known name' do
-        expect(get_tag_name).to eq(:GPS_Version)
+        expect(get_tag_name.name).to eq(:GPS_Version)
+        expect(get_tag_name.is_known).to be true;
       end
     end
 
@@ -20,7 +21,8 @@ RSpec.describe FileData::ExifTags do
       let(:tag_id) { 12 }
 
       it 'returns the ifd id and tag id joined together by a hyphen' do
-        expect(get_tag_name).to eq(:'555-12')
+        expect(get_tag_name.name).to eq(:'555-12')
+        expect(get_tag_name.is_known).to be false;
       end
     end
 
@@ -31,7 +33,8 @@ RSpec.describe FileData::ExifTags do
         let(:tag_id) { 0 }
 
         it 'returns the ifd name and tag id joined together by a hyphen' do
-          expect(get_tag_name).to eq(:'Tiff-0')
+          expect(get_tag_name.name).to eq(:'Tiff-0')
+          expect(get_tag_name.is_known).to be false;
         end
       end
     end
