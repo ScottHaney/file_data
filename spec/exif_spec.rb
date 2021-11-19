@@ -25,7 +25,7 @@ RSpec.describe FileData::Exif do
     describe '#image_data_only' do
       context 'when given an input stream' do
         it 'reads the image data' do
-          expect(FileData::Exif.image_data_only(stream)).to eq(Image_Structure_Width: 1)
+          expect(FileData::Exif.image_data_only(stream)[:Image_Structure_Width]).to eq(1)
         end
       end
 
@@ -36,7 +36,9 @@ RSpec.describe FileData::Exif do
         end
 
         it 'reads the image data' do
-          expect(exif.image_data_only(test_file)).to eq(Image_Structure_Width: 1)
+          image_data = exif.image_data_only(test_file)
+          expect(image_data[:Image_Structure_Width]).to eq(1)
+          expect(image_data.width).to eq(1)
         end
       end
     end
@@ -44,7 +46,9 @@ RSpec.describe FileData::Exif do
     describe '#thumbnail_data_only' do
       context 'when given an input stream' do
         it 'reads the thumbnail data' do
-          expect(exif.thumbnail_data_only(stream)).to eq(Image_Structure_Length: 2)
+          thumbnail_data = exif.thumbnail_data_only(stream)
+          expect(thumbnail_data[:Image_Structure_Length]).to eq(2)
+          expect(thumbnail_data.length).to eq(2)
         end
       end
 
@@ -55,7 +59,9 @@ RSpec.describe FileData::Exif do
         end
 
         it 'reads the thumbnail data' do
-          expect(exif.thumbnail_data_only(test_file)).to eq(Image_Structure_Length: 2)
+          thumbnail_data = exif.thumbnail_data_only(test_file)
+          expect(thumbnail_data[:Image_Structure_Length]).to eq(2)
+          expect(thumbnail_data.length).to eq(2)
         end
       end
     end
@@ -64,8 +70,12 @@ RSpec.describe FileData::Exif do
       context 'when given an input stream' do
         it 'reads the image data' do
           result = exif.all_data(stream)
-          expect(result.image).to eq(Image_Structure_Width: 1)
-          expect(result.thumbnail).to eq(Image_Structure_Length: 2)
+
+          expect(result.image[:Image_Structure_Width]).to eq(1)
+          expect(result.image.width).to eq(1)
+
+          expect(result.thumbnail[:Image_Structure_Length]).to eq(2)
+          expect(result.thumbnail.length).to eq(2)
         end
       end
     end
