@@ -8,69 +8,42 @@ file_data
 
 Ruby library that reads file metadata.
 
-The api provides a basic usage and an advanced usage. The basic usage will reopen and reparse the file every time it is called which is no problem when reading a single value but can be a performance drain for multiple values. The advanced usage allows the user to grab more than one value without having to read the file more than once.
-
-## Basic Usage
+## Basic Usage for an Exif File
 
 ```ruby
-filepath = '...' # Path to a jpeg or mpeg4 file
+require 'file_data'
 
-# Get the date when the file content originated. When a photo was taken, when a movie was recorded, etc
-FileData::FileInfo.origin_date(filepath)
+## Step 1: Read in the exif data using either a file path or a stream
 
-# Get the date when the file was considered to be created. This is usually tied in some way to when the file itself was created on a disk somewhere (not usually as useful as origin date)
-FileData::FileInfo.creation_date(filepath)
-```
+# Using a file path...
+file_path = '/home/user/desktop/my_file.jpg' # Path to an exif file
+exif_data = FileData::Exif.all_data(file_path) # read in all of the exif data from the file path
 
-## Advanced Usage
-
-Varies by file format type. Currently there are low level classes for parsing exif and mpeg4 metadata
-
-## Exif documentation
-
-Exif data is hierarchical and consists of tag/value pairs. The first level is whether or not the tag applies to the image or the image's thumbnail. Next a tag may be one of several sections and within the section it will have a unique numeric value. So given this terminology a unique key for an exif tag would be something like image/section1/123 for a tag that applies to the image in section 1 with a tag id of 123.
-
-To read exif data a stream of the jpeg data should be used as input. For performance reasons all of the data that is desired should be extracted in a single method from FileData::Exif. All methods will manipulate the stream position after they are called and the user should not count on the stream position being at a specific location after a FileData::Exif method call.
-
-Examples:
-
-```ruby
-## Get Exif data from a file path or stream
-
-# The file path or stream is passed as a parameter to class methods on FileData::Exif
-# rather than having the file path or stream set in the constructor and the methods
-# be instance methods to ensure that the user falls into a "pit of success" by only
-# opening the file once to get tag values rather than potentially multiple times
-
-# Get image exif data from a file path...
-hash = FileData::Exif.image_data_only('/path/to/file.jpg')
-
-# Get thumbnail exif data from a file stream... 
-File.open('/path/to/file.jpg', 'rb') do |f|
-  hash = FileData::Exif.thumbnail_data_only(f)
+# Or using a stream...
+exif_data = File.open(file_path, 'rb') do |f|
+  FileData::Exif.all_data(f)
 end
 
-## Extract values depending on how much data is returned
+## Step 2: Data is divided into image data and thumbnail data. Pick which you want to work with.
 
-# Image and thumbnail data are returned as a hash with keys
-# being the full tag name if it exists in FileData::ExifTags (see below listing)
-# or "#{ifd_id}-#{tag_id}" if there is no existing name for the tag in FileData::ExifTags
-image_hash = FileData::Exif.image_data_only(file_path_or_stream)
-image_description_value = image_hash[:Other_ImageDescription]
-unknown_gps_tag_value = image_hash["34853-99999"]
+# Both objects are hash-like and should respond to all hash method except .length which instead will return the value of :Image_Structure_Length,
+image_data = exif_data.image
+thumbnail_data = exif_data.thumbnail
 
-thumbnail_hash = FileData::Exif.thumbnail_data_only(file_path_or_stream)
-image_width_tag_value = thumbnail_hash[:Image_Structure_Width]
-unknown_gps_tag_value = thumbnail_hash["Tiff-99999"]
+## Step 3: Extract the tag values
 
-all_data = FileData::Exif.all_data(file_path_or_stream)
-image_hash = all_data.image
-thumbnail_hash = all_data.thumbnail
+### Step 3A: Extract tags with a known name (ones that are listed in the "Known Tag Keys" section below)
 
-# For extracting only a specific tag the value is returned and the search key must be
-# an array matching the keys needed to get traverse FileData:ExifTags (see below listing)
-image_description_value = FileData::Exif.only_image_tag(file_path_or_stream, [:Tiff, 270])
-unknown_exif_tag_value = FileData::Exif.only_thumbnail_tag(file_path_or_stream, [34665, 2])
+# Convenience methods are added for the names after the last underscore in the known tag names (casing and underscores are ignored in the convenince method names)
+
+bits_per_sample = image_data.BitsPerSample # Gets :Image_Structure_BitsPerSample from the :Tiff section
+bits_per_sample = image_data.bits_per_sample # Also gets :Image_Structure_BitsPerSample from the :Tiff section
+
+### Step 3B: Extract tags without a known name (ones NOT listed in the "Known Tag Keys" section below)
+
+# Use the format "#{ifd_id}-#{tag_id}" for the unknown tag to key into the data
+unknown_gps_tag_value = image_data["34853-99999"]
+
 ```
 
 ## Known Tag Keys
