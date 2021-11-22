@@ -23,13 +23,23 @@ module FileData
       hash[tag.to_s.split('_').last.upcase] = tag
     end
 
-    define_method(:method_missing) do |method_name, *args|
+    define_method(:method_missing) do |method_name, *args, &block|
       known_name = tags_map[method_name.to_s.tr('_', '').upcase]
       
       if known_name.nil?
-        @hash.send(method_name, *args)
+        @hash.send(method_name, *args, &block)
       else
         @hash[known_name]
+      end
+    end
+
+    define_method(:respond_to_missing?) do |method_name, include_private|
+      known_name = tags_map[method_name.to_s.tr('_', '').upcase]
+      
+      if known_name.nil?
+        @hash.respond_to?(known_name) || super
+      else
+        true
       end
     end
 

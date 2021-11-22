@@ -27,6 +27,11 @@ RSpec.describe FileData::Exif do
         it 'reads the image data' do
           expect(FileData::Exif.image_data_only(stream)[:Image_Structure_Width]).to eq(1)
         end
+
+        it 'succeeds in passing a missing method on ExifHash down to the inner hash object' do
+          image_data = exif.image_data_only(stream)
+          expect(image_data.keys).to match_array([:Image_Structure_Width])
+        end
       end
 
       context 'when given an input file' do
