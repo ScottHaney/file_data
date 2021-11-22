@@ -24,9 +24,9 @@ module FileData
 
     define_method(:method_missing) do |method_name, *args|
       known_name = tags_map[method_name.to_s.tr('_', '').upcase]
-      super if known_name.nil?
       
-      @hash[known_name]
+      return @hash.send(method_name, *args) if known_name.nil?
+      return @hash[known_name]
     end
 
     def initialize
