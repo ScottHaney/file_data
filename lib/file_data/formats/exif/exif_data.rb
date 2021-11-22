@@ -16,6 +16,7 @@ module FileData
     end
   end
 
+  # Hash with convenience methods for accessing known Exif tag values by name
   class ExifHash < BasicObject
     all_tags = ExifTags.tag_groups.values.map{|x| x.values}.flatten
     tags_map = all_tags.each_with_object({}) do |tag, hash|
@@ -25,8 +26,11 @@ module FileData
     define_method(:method_missing) do |method_name, *args|
       known_name = tags_map[method_name.to_s.tr('_', '').upcase]
       
-      return @hash.send(method_name, *args) if known_name.nil?
-      return @hash[known_name]
+      if known_name.nil?
+        @hash.send(method_name, *args)
+      else
+        @hash[known_name]
+      end
     end
 
     def initialize
